@@ -4,6 +4,7 @@
     @dragend="dragEnd"
     :style="{ background: color }"
     draggable="true"
+    :class="persistent ? 'persistent' : null"
     >{{ categoryName }}</span
   >
 </template>
@@ -30,7 +31,8 @@ export default {
   methods: {
     dragStart(e) {
       e.dropEffect = "move";
-      e.dataTransfer.setData("text", this.scene.category);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text", this.categoryName);
     },
     dragEnd(e) {
       if (
@@ -38,7 +40,8 @@ export default {
         !e.dataTransfer.mozUserCancelled &&
         !this.persistent
       ) {
-        this.scene.category = null;
+        console.log(e);
+        this.scene.category = "";
       }
     },
   },
@@ -49,5 +52,8 @@ export default {
 span {
   border: 2px solid;
   cursor: grab;
+}
+.persistent {
+  grid-column-start: 4;
 }
 </style>

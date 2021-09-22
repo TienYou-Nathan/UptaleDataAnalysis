@@ -1,16 +1,17 @@
 <template>
   <div
+    class="scene"
     @dragenter="dragEnter"
     @dragleave="dragLeave"
     @dragover="dragOver"
     @drop="drop"
-    :style="{ border: border_width + 'px solid black' }"
+    :style="{ border: '1px solid ' + border_color }"
   >
-    {{ scene.name }}
+    <span>{{ scene.name }}</span>
+
     <Category
-      v-if="scene.category"
       :categoryName="scene.category"
-      :color="this.mapCategories.get(scene.category).color"
+      :color="this.mapCategories.get(scene.category)?.color"
       :scene="scene"
     />
     <Theme :theme="scene.theme" />
@@ -29,7 +30,7 @@ export default {
   },
   data() {
     return {
-      border_width: 0,
+      border_color: "transparent",
     };
   },
   props: {
@@ -44,17 +45,17 @@ export default {
   methods: {
     dragEnter(e) {
       e.preventDefault();
-      this.border_width = 1;
     },
     dragLeave(e) {
-      this.border_width = 0;
+      this.border_color = "transparent";
     },
     dragOver(e) {
       e.preventDefault();
+      this.border_color = "black";
     },
     drop(e) {
       e.preventDefault();
-      this.border_width = 0;
+      this.border_color = "transparent";
       this.scene.category = e.dataTransfer.getData("text");
     },
   },
@@ -62,4 +63,12 @@ export default {
 </script>
 
 <style scoped>
+.scene {
+  text-align: left;
+  display: grid;
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-template-columns: 50% 25% 25%;
+  grid-template-rows: subgrid;
+}
 </style>

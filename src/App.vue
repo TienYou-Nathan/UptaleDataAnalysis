@@ -4,12 +4,15 @@
   <div id='nav' :style="{ 'margin-left': sidebarWidth }">
     <Header title='VR@COVID Paths Analysis'/>
     <FileLoader @filesLoaded="computeData"/>
-    <Paths v-if='display=="all"' :paths='paths' :display='display'/>
+
+  <div v-if='display=="all"'>
+    <Paths :paths='paths' :display='display'/>
+  </div>
 
   <div v-if='display=="compute"'>
     <Legend @check='legendselector' :categories="maptoarray(categories)"/>
     <Checkbox @check='mergeThematic' :name='"Merge thematics"'/>
-    <Paths  :paths='computedPaths' :display='display'/>
+    <Paths :paths='computedPaths' :display='display'/>
   </div>
     
   </div>
@@ -17,6 +20,8 @@
 
 <script>
 import {scenesInfo,categoriesInfo} from './scenesInfo.js'
+
+
 
 import Legend from './components/Legend/Legend.vue'
 import Checkbox from './components/Checkbox.vue'
@@ -75,13 +80,21 @@ export default {
   },
   data() {
     return {
+      //page to show
       display : "all",
+      //raw general file
       general_usage_output : [],
+      //raw detail file
       detail_usage_output : [],
+      //an entry per session, list of scenes visited this session
       paths : [],
+      //list of reduced and merged paths
       computedPaths : [],
+      //data about each scene
       scenes : [],
+      //data about each categories
       categories : [],
+      //option for computed paths
       merge_themes : false
     }
   },
@@ -91,9 +104,10 @@ export default {
   created() {
     this.scenes = new Map(scenesInfo.map(i => [i.id, {name:i.name, category:i.category, theme:i.theme, whitelisted:i.whitelisted}]));
     this.categories = categoriesInfo;
-    console.log('categoriesInfo')
+    console.log('---categoriesInfo---')
     console.log(categoriesInfo)
-    console.log(this.categories)
+    console.log('---scenesInfo---')
+    console.log(scenesInfo)
   },
   methods: {
     maptoarray(m){

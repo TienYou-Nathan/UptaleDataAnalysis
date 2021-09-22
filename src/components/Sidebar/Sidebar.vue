@@ -24,6 +24,7 @@ export default {
     <SidebarLink @sidebar_click='$emit("sidebar_click", "all")' icon="fas fa-home">All Routes</SidebarLink>
     <SidebarLink @sidebar_click='$emit("sidebar_click", "compute")' icon="fas fa-columns">Computed Routes</SidebarLink>
     <SidebarLink @sidebar_click='$emit("sidebar_click", "map")' icon="fas fa-chart-bar">Route Map</SidebarLink>
+    <SidebarLink @sidebar_click='$emit("sidebar_click", "categories")' icon="fa-solid fa-sitemap">Catergories Setup</SidebarLink>
 
     <span
       class="collapse-icon"

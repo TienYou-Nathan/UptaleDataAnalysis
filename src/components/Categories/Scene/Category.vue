@@ -52,6 +52,7 @@ export default {
 span {
   border: 2px solid;
   cursor: grab;
+  min-height: calc(1em + 2px);
 }
 .persistent {
   grid-column-start: 4;

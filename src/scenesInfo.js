@@ -4,6 +4,11 @@ categories.set('hub', {
     color : 'gray',
     whitelisted : true
 });
+categories.set('hub_formation', {
+    name : 'hub_formation',
+    color : 'darkgray',
+    whitelisted : true
+});
 categories.set('couloir_formation', {
     name : 'couloir_formation',
     color : 'orange',

@@ -1,24 +1,50 @@
 <template>
-    <p>{{title}}</p>
-    <div v-for="scene in arrayScenes" :key="scene.id">{{scene.name}}</div>
+  <button v-on:click="display='sceneList'" >Scenes List</button>
+  <button v-on:click="display='sceneCategorySetup'" >Category Setup</button>
+  <button v-on:click="display='sceneThemeSetup'" >Theme Setup</button>
+
+  <div v-if='display=="sceneList"'>
+      <SceneList :arrayScenes='arrayScenes' :mapCategories='mapCategories'/>
+  </div>
+
+  <div v-if='display=="sceneCategorySetup"'>
+      <SceneCategorySetup :arrayScenes='arrayScenes'/>
+  </div>
+
+  <div v-if='display=="sceneThemeSetup"'>
+      <SceneThemeSetup :arrayScenes='arrayScenes'/>
+  </div>
 </template>
 
 <script>
+
+import SceneList from './SceneList.vue'
+import SceneCategorySetup from './SceneCategorySetup.vue'
+import SceneThemeSetup from './SceneThemeSetup.vue'
 
 export default {
     name: 'CategoriesSetup',
     data(){
         return {
-            arrayScenes:[]
+            arrayScenes:[],
+            display:"sceneList"
         }
-    }
-    ,
+    },
+    components: {
+        SceneList,
+        SceneCategorySetup,
+        SceneThemeSetup
+    },
     props:{
         title:{
             type:String,
             default : 'Unknown Title'
         },
         mapScenes:{
+            type:Map,
+            default:[]
+        },
+        mapCategories:{
             type:Map,
             default:[]
         }

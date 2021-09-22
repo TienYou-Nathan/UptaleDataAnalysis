@@ -16,7 +16,7 @@
   </div>
 
   <div v-if='display=="categories"'>
-    <CategoriesSetup :title='"Available Scenes"' :mapScenes='scenes'/>
+    <CategoriesSetup :title='"Available Scenes"' :mapScenes='scenes' :mapCategories='categories'/>
   </div>
     
   </div>

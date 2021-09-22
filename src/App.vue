@@ -13,7 +13,7 @@
   </div>
 
   <div v-if='display=="categories"'>
-    <ScenesList :title='"Available Scenes"' :mapScenes='scenes'/>
+    <CategoriesSetup :title='"Available Scenes"' :mapScenes='scenes'/>
   </div>
     
   </div>
@@ -32,7 +32,7 @@ import Header from './components/Header.vue'
 import FileLoader from './components/FileLoader.vue'
 import Paths from './components/Paths.vue'
 
-import ScenesList from './components/Categories/ScenesList.vue'
+import CategoriesSetup from './components/Categories/CategoriesSetup.vue'
 
 const objectsEqual = (o1, o2) => {
   var objectsAreSame = true;
@@ -78,7 +78,7 @@ export default {
     Sidebar,
     Legend,
     Checkbox,
-    ScenesList,
+    CategoriesSetup,
   },
   data() {
     return {

@@ -14,6 +14,10 @@
     <Checkbox @check='mergeThematic' :name='"Merge thematics"'/>
     <Paths :paths='computedPaths' :display='display'/>
   </div>
+
+  <div v-if='display=="categories"'>
+    <ScenesList :title='"Available Scenes"' :mapScenes='scenes'/>
+  </div>
     
   </div>
 </template>
@@ -32,6 +36,8 @@ import { sidebarWidth } from '@/components/Sidebar/state'
 import Header from './components/Header.vue'
 import FileLoader from './components/FileLoader.vue'
 import Paths from './components/Paths.vue'
+
+import ScenesList from './components/Categories/ScenesList.vue'
 
 const objectsEqual = (o1, o2) => {
   var objectsAreSame = true;
@@ -77,6 +83,7 @@ export default {
     Sidebar,
     Legend,
     Checkbox,
+    ScenesList,
   },
   data() {
     return {

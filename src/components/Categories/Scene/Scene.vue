@@ -10,15 +10,13 @@
     <span>{{ scene.name }}</span>
 
     <SceneProperty
-      :name="scene.category"
-      :color="this.mapCategories.get(scene.category)?.color"
+      :object="this.mapCategories.get(scene.category)"
       :scene="scene"
       :type="'category'"
       :border="borders.category"
     />
     <SceneProperty
-      :name="scene.theme"
-      :color="this.mapThemes.get(scene.theme)?.color"
+      :object="this.mapThemes.get(scene.theme)"
       :scene="scene"
       :type="'theme'"
       :border="borders.theme"

@@ -1,14 +1,22 @@
 <template>
   <a
     id="save"
-    @mousedown="refreshSaveData"
+    @click="refreshSaveData"
     :href="saveData"
     download="sceneInfo.json"
-    >Save Settings</a
   >
+    Save Settings
+  </a>
+  <form @submit="addCategory">
+    <input id="categoryName" type="text" placeholder="add category" />
+  </form>
+  <form @submit="addTheme">
+    <input id="themeName" type="text" placeholder="add theme" />
+  </form>
+
   <div id="sceneList">
     <Scene
-      v-for="scene in arrayScenes"
+      v-for="scene in mapToArray(mapScenes)"
       :key="scene.id"
       :scene="scene"
       :mapCategories="mapCategories"
@@ -18,24 +26,24 @@
     <div id="categoryList">
       <div class="sticky">
         <SceneProperty
-          v-for="category in arrayCategories"
+          v-for="category in mapToArray(mapCategories)"
           :key="category.id"
-          :name="category.id"
-          :color="category.color"
+          :object="category"
           :persistent="true"
           :type="'category'"
+          @deleteProperty="removeProperty"
         />
       </div>
     </div>
     <div id="themeList">
       <div class="sticky">
         <SceneProperty
-          v-for="theme in arrayThemes"
+          v-for="theme in mapToArray(mapThemes)"
           :key="theme.id"
-          :name="theme.id"
-          :color="theme.color"
+          :object="theme"
           :persistent="true"
           :type="'theme'"
+          @deleteProperty="removeProperty"
         />
       </div>
     </div>
@@ -45,6 +53,7 @@
 <script>
 import Scene from "./Scene/Scene.vue";
 import SceneProperty from "./Scene/SceneProperty.vue";
+import { mapToArray } from "../../utilities";
 
 export default {
   name: "SceneList",
@@ -78,35 +87,47 @@ export default {
       default: [],
     },
   },
-  created() {
-    this.mapScenes.forEach((value, key) => {
-      let temp = value;
-      temp.id = key;
-      this.arrayScenes.push(temp);
-    });
-
-    this.mapCategories.forEach((value, key) => {
-      let temp = value;
-      temp.id = key;
-      this.arrayCategories.push(temp);
-    });
-    this.mapThemes.forEach((value, key) => {
-      let temp = value;
-      temp.id = key;
-      this.arrayThemes.push(temp);
-    });
-  },
+  created() {},
   methods: {
-    refreshSaveData() {
+    refreshSaveDataURI() {
       this.saveData =
         "data:text/json;charset=utf-8," +
         encodeURIComponent(
           JSON.stringify({
-            arrayScenes: [...this.arrayScenes],
-            arrayCategories: [...this.arrayCategories],
-            arrayThemes: [...this.arrayThemes],
+            arrayScenes: [...mapToArray(this.mapScenes)],
+            arrayCategories: [...mapToArray(this.mapCategories)],
+            arrayThemes: [...mapToArray(this.mapThemes)],
           })
         );
+    },
+    addCategory(e) {
+      e.preventDefault();
+      this.mapCategories.set(
+        e.srcElement.querySelector("#categoryName").value,
+        {
+          color: "#ffffff",
+        }
+      );
+    },
+    addTheme(e) {
+      e.preventDefault();
+      this.mapThemes.set(e.srcElement.querySelector("#themeName").value, {
+        color: "#ffffff",
+      });
+    },
+    mapToArray(data) {
+      return mapToArray(data);
+    },
+    removeProperty({ type, name }) {
+      let target;
+
+      if (type == "category") {
+        target = this.mapCategories;
+      } else if (type == "theme") {
+        target = this.mapThemes;
+      }
+
+      target.delete(name);
     },
   },
 };

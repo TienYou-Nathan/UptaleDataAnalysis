@@ -1,4 +1,11 @@
 <template>
+  <a
+    id="save"
+    @mousedown="refreshSaveData"
+    :href="saveData"
+    download="sceneInfo.json"
+    >Save Settings</a
+  >
   <div id="sceneList">
     <Scene
       v-for="scene in arrayScenes"
@@ -50,6 +57,7 @@ export default {
       arrayScenes: [],
       arrayCategories: [],
       arrayThemes: [],
+      saveData: {},
     };
   },
   props: {
@@ -87,7 +95,19 @@ export default {
       temp.id = key;
       this.arrayThemes.push(temp);
     });
-    console.log(this.arrayThemes);
+  },
+  methods: {
+    refreshSaveData() {
+      this.saveData =
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(
+          JSON.stringify({
+            arrayScenes: [...this.arrayScenes],
+            arrayCategories: [...this.arrayCategories],
+            arrayThemes: [...this.arrayThemes],
+          })
+        );
+    },
   },
 };
 </script>

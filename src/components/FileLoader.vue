@@ -1,9 +1,9 @@
 <template>
     <div>
-        <label for="general_input">Select general file here</label>
-        <input type="file" id="general_input" name="general_input" accept=".csv">
-        <label for="detail_input">Select detail file here</label>
-        <input type="file" id="detail_input" name="detail_input" accept=".csv">
+        <div :key='field.name' v-for='field in fields'>
+            <label :for='field.name'>{{field.label}}</label>
+            <input type="file" :id='field.name' :name='field.name' accept=".csv">
+        </div>
     </div>
     <button id=start v-on:click='startAnalysis()'>Start Analysis</button>
 </template>
@@ -11,6 +11,16 @@
 <script>
 export default {
     name : 'FileLoader',
+    props : {
+        fields : {
+            type : Array,
+            default : [{
+                name: "fileLoader",
+                label: "Select a file here",
+                defaultPath: ""
+            }]
+        }
+    },
     emits : ['filesLoaded'],
     methods: {
         load_file : async function (file) {
@@ -36,13 +46,17 @@ export default {
             return data;
         },
         startAnalysis : async function(){
-            const general = document.getElementById('general_input').files[0];
-            const detail = document.getElementById('detail_input').files[0];
+            let result = [];
 
-            this.$emit('filesLoaded', {
-                general : general!=undefined?await this.load_file(general):await d3.csv('/general.csv'), 
-                detail : detail!=undefined?await this.load_file(detail):await d3.csv('/detail.csv')
-            });
+            this.fields.forEach(f => {
+                const request = document.getElementById(f.name).files[0];
+                result.push(request!=undefined?this.load_file(request):d3.csv(f.defaultPath));
+            })
+
+            console.log("---results file loaded---")
+            console.log(Promise.all(result))         
+
+            this.$emit('filesLoaded', await Promise.all(result));
         },
     }
 }

@@ -36,11 +36,11 @@ themes.set('neutre', {
 })
 
 themes.set('gestion_mortuaire', {
-    color: 'red'
+    color: 'lightpink'
 })
 
 themes.set('gestes_a_adopter', {
-    color: 'blue'
+    color: 'lightblue'
 })
 
 export const themesInfo = themes;

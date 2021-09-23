@@ -5,16 +5,16 @@
     :style="{ background: color }"
     draggable="true"
     :class="persistent ? 'persistent' : null"
-    >{{ categoryName }}</span
+    >{{ name }}</span
   >
 </template>
 
 <script>
 export default {
-  name: "Category",
+  name: "SceneProperty",
 
   props: {
-    categoryName: {
+    name: {
       type: String,
     },
     color: {
@@ -27,12 +27,17 @@ export default {
       type: Boolean,
       default: false,
     },
+    type: {
+      type: String,
+      default: "category",
+    },
   },
   methods: {
     dragStart(e) {
       e.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text", this.categoryName);
+      e.dataTransfer.setData("text", this.name);
+      e.dataTransfer.setData("type", this.type);
     },
     dragEnd(e) {
       if (
@@ -40,7 +45,7 @@ export default {
         !e.dataTransfer.mozUserCancelled &&
         !this.persistent
       ) {
-        this.scene.category = "";
+        this.scene[type] = "";
       }
     },
   },

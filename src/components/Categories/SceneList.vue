@@ -5,15 +5,29 @@
       :key="scene.id"
       :scene="scene"
       :mapCategories="mapCategories"
+      :mapThemes="mapThemes"
     />
     <div id="categoryList">
-      <div id="categorySticky">
-        <Category
+      <div class="sticky">
+        <SceneProperty
           v-for="category in arrayCategories"
           :key="category.id"
-          :categoryName="category.name"
+          :name="category.id"
           :color="category.color"
           :persistent="true"
+          :type="'category'"
+        />
+      </div>
+    </div>
+    <div id="themeList">
+      <div class="sticky">
+        <SceneProperty
+          v-for="theme in arrayThemes"
+          :key="theme.id"
+          :name="theme.id"
+          :color="theme.color"
+          :persistent="true"
+          :type="'theme'"
         />
       </div>
     </div>
@@ -22,18 +36,19 @@
 
 <script>
 import Scene from "./Scene/Scene.vue";
-import Category from "./Scene/Category.vue";
+import SceneProperty from "./Scene/SceneProperty.vue";
 
 export default {
   name: "SceneList",
   components: {
     Scene,
-    Category,
+    SceneProperty,
   },
   data() {
     return {
       arrayScenes: [],
       arrayCategories: [],
+      arrayThemes: [],
     };
   },
   props: {
@@ -46,6 +61,10 @@ export default {
       default: [],
     },
     mapCategories: {
+      type: Map,
+      default: [],
+    },
+    mapThemes: {
       type: Map,
       default: [],
     },
@@ -62,7 +81,12 @@ export default {
       temp.id = key;
       this.arrayCategories.push(temp);
     });
-    console.log(this.arrayCategories);
+    this.mapThemes.forEach((value, key) => {
+      let temp = value;
+      temp.id = key;
+      this.arrayThemes.push(temp);
+    });
+    console.log(this.arrayThemes);
   },
 };
 </script>
@@ -72,15 +96,20 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
-#categoryList{
+#categoryList {
   grid-column-start: 4;
   /* Firefox workaround to 1/-1 */
   grid-row: 1/9999999999;
 }
-#categorySticky{
+#themeList {
+  grid-column-start: 5;
+  /* Firefox workaround to 1/-1 */
+  grid-row: 1/9999999999;
+}
+.sticky {
   display: flex;
   flex-direction: column;
-  position:sticky;
-  top:0px;
+  position: sticky;
+  top: 0px;
 }
 </style>

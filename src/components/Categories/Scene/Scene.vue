@@ -9,24 +9,28 @@
   >
     <span>{{ scene.name }}</span>
 
-    <Category
-      :categoryName="scene.category"
+    <SceneProperty
+      :name="scene.category"
       :color="this.mapCategories.get(scene.category)?.color"
       :scene="scene"
+      :type="'category'"
     />
-    <Theme :theme="scene.theme" />
+    <SceneProperty
+      :name="scene.theme"
+      :color="this.mapThemes.get(scene.theme)?.color"
+      :scene="scene"
+      :type="'theme'"
+    />
   </div>
 </template>
 
 <script>
-import Category from "./Category.vue";
-import Theme from "./Theme.vue";
+import SceneProperty from "./SceneProperty.vue";
 
 export default {
   name: "Scene",
   components: {
-    Category,
-    Theme,
+    SceneProperty,
   },
   data() {
     return {
@@ -38,6 +42,10 @@ export default {
       type: Object,
     },
     mapCategories: {
+      type: Map,
+      default: [],
+    },
+    mapThemes: {
       type: Map,
       default: [],
     },
@@ -56,7 +64,8 @@ export default {
     drop(e) {
       e.preventDefault();
       this.border_color = "transparent";
-      this.scene.category = e.dataTransfer.getData("text");
+      this.scene[e.dataTransfer.getData("type")] =
+        e.dataTransfer.getData("text");
     },
   },
 };
@@ -68,9 +77,9 @@ export default {
   display: grid;
   grid-column-start: 1;
   grid-column-end: 4;
-  background:lightgreen;
-  margin:5px;
-  padding:5px;
+  background: lightgreen;
+  margin: 5px;
+  padding: 5px;
   border-radius: 5px;
   /* grid-template-columns: 50% 25% 25%; */
   grid-template-columns: subgrid;

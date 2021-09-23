@@ -14,12 +14,14 @@
       :color="this.mapCategories.get(scene.category)?.color"
       :scene="scene"
       :type="'category'"
+      :border="borders.category"
     />
     <SceneProperty
       :name="scene.theme"
       :color="this.mapThemes.get(scene.theme)?.color"
       :scene="scene"
       :type="'theme'"
+      :border="borders.theme"
     />
   </div>
 </template>
@@ -35,6 +37,10 @@ export default {
   data() {
     return {
       border_color: "transparent",
+      borders: {
+        category: null,
+        theme: null,
+      },
     };
   },
   props: {
@@ -49,6 +55,10 @@ export default {
       type: Map,
       default: [],
     },
+    mapScenes: {
+      type: Map,
+      default: [],
+    },
   },
   methods: {
     dragEnter(e) {
@@ -56,16 +66,25 @@ export default {
     },
     dragLeave(e) {
       this.border_color = "transparent";
+      this.borders[e.dataTransfer.getData("type")] = null;
     },
     dragOver(e) {
       e.preventDefault();
       this.border_color = "black";
+      this.borders[e.dataTransfer.getData("type")] = "2px solid red";
     },
     drop(e) {
       e.preventDefault();
       this.border_color = "transparent";
-      this.scene[e.dataTransfer.getData("type")] =
-        e.dataTransfer.getData("text");
+      this.borders[e.dataTransfer.getData("type")] = null;
+      let type = e.dataTransfer.getData("type");
+      let origin = e.dataTransfer.getData("origin");
+      //remove scenePropery from original scene
+      if (origin) {
+        this.mapScenes.get(origin)[type] = "";
+      }
+      //set sceneproperty to this scene
+      this.scene[type] = e.dataTransfer.getData("text");
     },
   },
 };

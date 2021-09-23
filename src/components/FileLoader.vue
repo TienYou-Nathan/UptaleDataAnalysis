@@ -11,7 +11,17 @@
 <script>
 export default {
     name : 'FileLoader',
+    data(){
+        return {
+            generalData : Array,
+            detailData : Array
+        }
+    },
     emits : ['filesLoaded'],
+    async created(){
+        this.generalData = await d3.csv('/general.csv');
+        this.detailData = await d3.csv('/detail.csv');
+    },
     methods: {
         load_file : async function (file) {
             function readFileAsync(file) {
@@ -36,14 +46,13 @@ export default {
             return data;
         },
         startAnalysis : async function(){
-            const general = await this.load_file(document.getElementById('general_input').files[0]);
-            const detail = await this.load_file(document.getElementById('detail_input').files[0]);
+            const general = document.getElementById('general_input').files[0];
+            const detail = document.getElementById('detail_input').files[0];
 
-            if(general!=undefined && detail!=undefined){
-                this.$emit('filesLoaded', {general : general, detail : detail});
-            } else {
-                console.log("Erreur, fichiers manquants");
-            }
+            this.$emit('filesLoaded', {
+                general : general!=undefined?await this.load_file(general):this.generalData, 
+                detail : detail!=undefined?await this.load_file(detail):this.detailData
+            });
         },
     }
 }

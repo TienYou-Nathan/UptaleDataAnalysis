@@ -17,7 +17,8 @@ export default {
             default : [{
                 name: "fileLoader",
                 label: "Select a file here",
-                defaultPath: ""
+                defaultPath: "",
+                format: ".csv"
             }]
         }
     },
@@ -46,17 +47,20 @@ export default {
             return data;
         },
         startAnalysis : async function(){
-            let result = [];
+            let query = [];
 
             this.fields.forEach(f => {
                 const request = document.getElementById(f.name).files[0];
-                result.push(request!=undefined?this.load_file(request):d3.csv(f.defaultPath));
+                query.push(request!=undefined?this.load_file(request):d3.csv(f.defaultPath));
             })
 
-            console.log("---results file loaded---")
-            console.log(Promise.all(result))         
+            const arr = await Promise.all(query);
+            let result = {};
+            this.fields.forEach((f,i) => {
+                result[f.name]=arr[i];
+            })
 
-            this.$emit('filesLoaded', await Promise.all(result));
+            this.$emit('filesLoaded', result);
         },
     }
 }

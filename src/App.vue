@@ -448,14 +448,12 @@ export default {
     },
 
     computeData(files){
-      console.log(files)
-      console.log(...files)
 
-      this.general_usage_output = files[0];
+      this.general_usage_output = files["general"];
 
       //suppressing duplicate data due to an Uptale bug
       //daplicate matches EventTime, EventName and SessionID
-      this.detail_usage_output = files[1].reduce((accumulator, current) => {
+      this.detail_usage_output = files["detail"].reduce((accumulator, current) => {
         if (checkIfAlreadyExist(current)) {
           return accumulator;
         } else {

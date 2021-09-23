@@ -40,7 +40,6 @@ export default {
         !e.dataTransfer.mozUserCancelled &&
         !this.persistent
       ) {
-        console.log(e);
         this.scene.category = "";
       }
     },
@@ -53,8 +52,5 @@ span {
   border: 2px solid;
   cursor: grab;
   min-height: calc(1em + 2px);
-}
-.persistent {
-  grid-column-start: 4;
 }
 </style>

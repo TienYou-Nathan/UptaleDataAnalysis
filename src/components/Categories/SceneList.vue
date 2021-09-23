@@ -6,13 +6,17 @@
       :scene="scene"
       :mapCategories="mapCategories"
     />
-    <Category
-      v-for="category in arrayCategories"
-      :key="category.id"
-      :categoryName="category.name"
-      :color="category.color"
-      :persistent="true"
-    />
+    <div id="categoryList">
+      <div id="categorySticky">
+        <Category
+          v-for="category in arrayCategories"
+          :key="category.id"
+          :categoryName="category.name"
+          :color="category.color"
+          :persistent="true"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -66,6 +70,17 @@ export default {
 <style scoped>
 #sceneList {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+#categoryList{
+  grid-column-start: 4;
+  /* Firefox workaround to 1/-1 */
+  grid-row: 1/9999999999;
+}
+#categorySticky{
+  display: flex;
+  flex-direction: column;
+  position:sticky;
+  top:0px;
 }
 </style>

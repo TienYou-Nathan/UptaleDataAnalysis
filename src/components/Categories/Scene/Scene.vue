@@ -67,8 +67,12 @@ export default {
   text-align: left;
   display: grid;
   grid-column-start: 1;
-  grid-column-end: 3;
-  grid-template-columns: 50% 25% 25%;
-  grid-template-rows: subgrid;
+  grid-column-end: 4;
+  background:lightgreen;
+  margin:5px;
+  padding:5px;
+  border-radius: 5px;
+  /* grid-template-columns: 50% 25% 25%; */
+  grid-template-columns: subgrid;
 }
 </style>

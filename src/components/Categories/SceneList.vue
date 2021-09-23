@@ -6,6 +6,7 @@
       :scene="scene"
       :mapCategories="mapCategories"
       :mapThemes="mapThemes"
+      :mapScenes="mapScenes"
     />
     <div id="categoryList">
       <div class="sticky">

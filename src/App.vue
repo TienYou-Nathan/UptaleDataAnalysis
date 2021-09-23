@@ -20,13 +20,14 @@
         :title="'Available Scenes'"
         :mapScenes="scenes"
         :mapCategories="categories"
+        :mapThemes="themes"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { scenesInfo, categoriesInfo } from "./scenesInfo.js";
+import { scenesInfo, categoriesInfo, themesInfo } from "./scenesInfo.js";
 
 import Legend from "./components/Legend/Legend.vue";
 import Checkbox from "./components/Checkbox.vue";
@@ -104,6 +105,8 @@ export default {
       scenes: [],
       //data about each categories
       categories: [],
+      //data about each theme
+      themes: [],
       //option for computed paths
       merge_themes: false,
     };
@@ -123,6 +126,8 @@ export default {
         },
       ])
     );
+    this.themes = themesInfo;
+
     this.categories = categoriesInfo;
     console.log("---categoriesInfo---");
     console.log(categoriesInfo);

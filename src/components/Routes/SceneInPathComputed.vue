@@ -52,22 +52,21 @@
 </template>
 
 <script>
-import { categoriesInfo } from "../../scenesInfo.js";
-
 export default {
   name: "SceneInPathComputed",
   props: {
     scene: Object,
+    categoriesInfo: {
+      type: Map,
+    },
   },
   data() {
     return {
-      categoriesInfo: [],
       color: String,
       infoCollapse: true,
     };
   },
   created() {
-    this.categoriesInfo = categoriesInfo;
     this.color = "red";
   },
   methods: {

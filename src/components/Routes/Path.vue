@@ -24,7 +24,10 @@
     <div v-if="display == 'compute'" class="scenes_path">
       <div :key="scene.id" v-for="scene in path.path" class="scenes_path">
         <i class="fas fa-arrow-right" />
-        <SceneInPathComputed :scene="scene" />
+        <SceneInPathComputed
+          :scene="scene"
+          :categoriesInfo="categoriesInfo: [],"
+        />
       </div>
     </div>
   </div>

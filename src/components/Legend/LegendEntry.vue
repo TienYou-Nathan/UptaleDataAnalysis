@@ -5,7 +5,7 @@
     <input
       class="entry_checkbox"
       type="checkbox"
-      :checked="entry.name"
+      :checked="entry.whitelisted"
       @click="$emit('check', { id: entry.id, checked: $event.target.checked })"
     />
   </div>

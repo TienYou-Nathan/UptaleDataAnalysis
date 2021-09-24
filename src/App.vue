@@ -147,14 +147,11 @@ export default {
     },
 
     legendselector(e) {
-      console.log("checkbox toggleled");
-      console.log(e.id);
-      console.log(e.checked);
       this.categories.get(e.id).whitelisted = e.checked;
-
       this.updatePathsWhitelist(this.paths);
       console.log(this.paths);
       this.computePaths(this.paths);
+      console.log(this.categories)
     },
 
     mergeThematic(e) {

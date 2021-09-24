@@ -18,9 +18,8 @@
       />
     </div>
 
-    <div>
+    <div v-if="display == 'categories'">
       <SceneList
-        v-if="display == 'categories'"
         :mapScenes="scenes"
         :mapCategories="categories"
         :mapThemes="themes"

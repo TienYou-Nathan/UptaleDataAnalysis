@@ -16,13 +16,17 @@
     </div>
 
     <div v-if="display == 'categories'">
-      <CategoriesSetup :title="'Available Scenes'" :mapScenes="scenes" />
+      <SceneList
+        :mapScenes="scenes"
+        :mapCategories="categories"
+        :mapThemes="themes"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { scenesInfo, categoriesInfo, themesInfo } from "./scenesInfo.js";
+import { arrayToMap } from "./utilities";
 
 import Legend from "./components/Legend/Legend.vue";
 import Checkbox from "./components/Checkbox.vue";
@@ -110,11 +114,19 @@ export default {
           name: "general",
           label: "Select general data file file here",
           defaultPath: "/general.csv",
+          format: "csv",
         },
         {
           name: "detail",
           label: "Select detail data file file here",
           defaultPath: "/detail.csv",
+          format: "csv",
+        },
+        {
+          name: "categories",
+          label: "Select categories and themes data file here",
+          defaultPath: "/sceneInfo.json",
+          format: "json",
         },
       ],
     };
@@ -123,24 +135,7 @@ export default {
     return { sidebarWidth };
   },
   created() {
-    this.scenes = new Map(
-      scenesInfo.map((i) => [
-        i.id,
-        {
-          name: i.name,
-          category: i.category,
-          theme: i.theme,
-          whitelisted: i.whitelisted,
-        },
-      ])
-    );
-    this.themes = themesInfo;
-
-    this.categories = categoriesInfo;
-    console.log("---categoriesInfo---");
-    console.log(categoriesInfo);
-    console.log("---scenesInfo---");
-    console.log(scenesInfo);
+    return;
   },
   methods: {
     maptoarray(m) {
@@ -156,7 +151,6 @@ export default {
       console.log(e.id);
       console.log(e.checked);
       this.categories.get(e.id).whitelisted = e.checked;
-      console.log(this.categories);
 
       this.updatePathsWhitelist(this.paths);
       console.log(this.paths);
@@ -457,9 +451,7 @@ export default {
                 scene.zonesFound.length > 0 ||
                 pathEntry.category != "chambre_entrainement"
               ) {
-                const currentTheme = scenesInfo.find(
-                  (s) => s.name == scene.name
-                ).theme;
+                const currentTheme = this.scenes.get(scene.name).theme;
                 let themeIndex = pathEntry.thematicsData.findIndex(
                   (e) => e.theme == currentTheme
                 );
@@ -606,6 +598,10 @@ export default {
 
     computeData(files) {
       this.general_usage_output = files.general;
+      console.log(files.categories);
+      this.categories = arrayToMap(files.categories.arrayCategories);
+      this.themes = arrayToMap(files.categories.arrayThemes);
+      this.scenes = arrayToMap(files.categories.arrayScenes);
 
       //suppressing duplicate data due to an Uptale bug
       //daplicate matches EventTime, EventName and SessionID
@@ -659,9 +655,6 @@ export default {
         }
         return true;
       });
-
-      console.log(this.general_usage_output);
-      console.log(this.detail_usage_output);
 
       this.setPaths(this.detail_usage_output);
       this.computePaths(this.paths);

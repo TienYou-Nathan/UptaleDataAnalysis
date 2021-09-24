@@ -7,7 +7,7 @@
     @drop="drop"
     :style="{ border: '1px solid ' + border_color }"
   >
-    <span>{{ scene.name }}</span>
+    <span>{{ scene.id }}</span>
 
     <SceneProperty
       :object="this.mapCategories.get(scene.category)"

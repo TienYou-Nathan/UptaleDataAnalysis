@@ -70,10 +70,6 @@ export default {
     };
   },
   props: {
-    title: {
-      type: String,
-      default: "Unknown Title",
-    },
     mapScenes: {
       type: Map,
       default: [],

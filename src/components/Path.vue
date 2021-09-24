@@ -1,37 +1,50 @@
 <template>
-    <div class='path'>
-        <h3>Id : {{path.proportion==undefined?path.id:`${path.id}  -  Entries : ${path.entries}  -  Proportion : ${path.proportion.toFixed(2)}`}}</h3>
-        <p>{{path.name}}</p>
-        <div v-if='display=="all"' class='scenes_path'>
-            <div :key="scene.enterTime" v-for="scene in path.scenes" class='scenes_path'>
-              <i class="fas fa-arrow-right"/>
-              <SceneInPath :scene='scene.scene' :time='scene.enterTime'/>
-            </div> 
-        </div>
-        <div v-if='display=="compute"' class='scenes_path'>
-            <div :key="scene.id" v-for="scene in path.path" class='scenes_path'>
-                <i class="fas fa-arrow-right"/>
-                <SceneInPathComputed :scene='scene'/>
-            </div> 
-        </div>
+  <div class="path">
+    <h3>
+      Id :
+      {{
+        path.proportion == undefined
+          ? path.id
+          : `${path.id}  -  Entries : ${
+              path.entries
+            }  -  Proportion : ${path.proportion.toFixed(2)}`
+      }}
+    </h3>
+    <p>{{ path.name }}</p>
+    <div v-if="display == 'all'" class="scenes_path">
+      <div
+        :key="scene.enterTime"
+        v-for="scene in path.scenes"
+        class="scenes_path"
+      >
+        <i class="fas fa-arrow-right" />
+        <SceneInPath :scene="scene.scene" :time="scene.enterTime" />
+      </div>
     </div>
+    <div v-if="display == 'compute'" class="scenes_path">
+      <div :key="scene.id" v-for="scene in path.path" class="scenes_path">
+        <i class="fas fa-arrow-right" />
+        <SceneInPathComputed :scene="scene" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import SceneInPath from './SceneInPath.vue'
-import SceneInPathComputed from './SceneInPathComputed.vue'
+import SceneInPath from "./SceneInPath.vue";
+import SceneInPathComputed from "./SceneInPathComputed.vue";
 
 export default {
-    name : 'Path',
-    components : {
-        SceneInPath,
-        SceneInPathComputed,
-    },
-    props : {
-        path : Object,
-        display : String,
-    }
-}
+  name: "Path",
+  components: {
+    SceneInPath,
+    SceneInPathComputed,
+  },
+  props: {
+    path: Object,
+    display: String,
+  },
+};
 </script>
 
 <style scoped>
@@ -53,12 +66,12 @@ export default {
   justify-content: left;
 }
 
-.scenes_path{
-    display: flex;
-    flex-wrap: wrap;
-    /* for horizontal aligning of child divs */
-    justify-content: left;
-    /* for vertical aligning */
-    align-items: center;
+.scenes_path {
+  display: flex;
+  flex-wrap: wrap;
+  /* for horizontal aligning of child divs */
+  justify-content: left;
+  /* for vertical aligning */
+  align-items: center;
 }
 </style>

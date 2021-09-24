@@ -6,17 +6,21 @@
     <FileLoader @filesLoaded="computeData" :fields="fields" />
 
     <div v-if="display == 'all'">
-      <Paths :paths="paths" :display="display" />
+      <AllRoutes :paths="paths" />
     </div>
 
     <div v-if="display == 'compute'">
-      <Legend @check="legendselector" :categories="maptoarray(categories)" />
-      <Checkbox @check="mergeThematic" :name="'Merge thematics'" />
-      <Paths :paths="computedPaths" :display="display" />
+      <ComputedRoutes
+        :categories="categories"
+        :computedPaths="computedPaths"
+        @updateAndComputePaths="updateAndComputePaths"
+        @mergeThematic="mergeThematic"
+      />
     </div>
 
-    <div v-if="display == 'categories'">
+    <div>
       <SceneList
+        v-if="display == 'categories'"
         :mapScenes="scenes"
         :mapCategories="categories"
         :mapThemes="themes"
@@ -28,17 +32,15 @@
 <script>
 import { arrayToMap } from "./utilities";
 
-import Legend from "./components/Legend/Legend.vue";
-import Checkbox from "./components/Checkbox.vue";
+import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
+import AllRoutes from "./components/Routes/All/AllRoutes.vue";
+import SceneList from "./components/Categories/SceneList.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
 
 import Header from "./components/Header.vue";
 import FileLoader from "./components/FileLoader.vue";
-import Paths from "./components/Paths.vue";
-
-import SceneList from "./components/Categories/SceneList.vue";
 
 const objectsEqual = (o1, o2) => {
   var objectsAreSame = true;
@@ -82,10 +84,9 @@ export default {
   components: {
     Header,
     FileLoader,
-    Paths,
+    ComputedRoutes,
+    AllRoutes,
     Sidebar,
-    Legend,
-    Checkbox,
     SceneList,
   },
   data() {
@@ -145,13 +146,9 @@ export default {
       }
       return arr;
     },
-
-    legendselector(e) {
-      this.categories.get(e.id).whitelisted = e.checked;
+    updateAndComputePaths(e) {
       this.updatePathsWhitelist(this.paths);
-      console.log(this.paths);
       this.computePaths(this.paths);
-      console.log(this.categories)
     },
 
     mergeThematic(e) {
@@ -175,7 +172,6 @@ export default {
         e.whitelisted = this.categories.get(e.category).whitelisted;
       });
     },
-
     setPaths(data) {
       //on ne garde que les données concernant un changement de scène
       const scene_changes = data.filter((d) => {
@@ -189,11 +185,6 @@ export default {
           d.EventName == "Launch_CloseSession"
         );
       });
-
-      console.log("filteredscenes");
-      console.log(
-        scene_changes.map((e) => [e.EventName, e.SessionId, e.EventTime])
-      );
 
       let paths = [];
 
@@ -220,8 +211,6 @@ export default {
           e.EventName == "Launch_CloseSession"
         ) {
           endW = e;
-
-          console.log(startW.EventName);
 
           const i = paths.findIndex((d) => startW.SessionId == d.id);
           //si la session actuelle n'est pas enregistrées, on crée une nouvelle entrée
@@ -267,8 +256,6 @@ export default {
           endW = undefined;
         }
       });
-      console.log("paths");
-      console.log(paths);
       this.paths = paths;
     },
 
@@ -424,8 +411,8 @@ export default {
         a.proportion < b.proportion ? 1 : b.proportion < a.proportion ? -1 : 0
       );
       this.analyseComputedPaths(computedPaths);
-      console.log("Computed Path");
-      console.log(computedPaths);
+      // console.log("Computed Path");
+      // console.log(computedPaths);
       this.computedPaths = computedPaths;
     },
 
@@ -435,7 +422,7 @@ export default {
     // }
 
     analyseComputedPaths(computedPaths) {
-      console.log(computedPaths);
+      // console.log(computedPaths);
 
       computedPaths.forEach((uniquePath) => {
         uniquePath.path.forEach((pathEntry) => {
@@ -595,7 +582,7 @@ export default {
 
     computeData(files) {
       this.general_usage_output = files.general;
-      console.log(files.categories);
+      // console.log(files.categories);
       this.categories = arrayToMap(files.categories.arrayCategories);
       this.themes = arrayToMap(files.categories.arrayThemes);
       this.scenes = arrayToMap(files.categories.arrayScenes);

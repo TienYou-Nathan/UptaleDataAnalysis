@@ -72,7 +72,6 @@ export default {
   methods: {
     toggleInfo() {
       this.infoCollapse = !this.infoCollapse;
-      console.log(this.infoCollapse);
     },
   },
 };

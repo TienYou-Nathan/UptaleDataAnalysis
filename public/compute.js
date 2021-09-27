@@ -1,4 +1,58 @@
-import { arrayToMap, fieldSorterOptimized, objectsEqual } from "./utilities";
+const arrayToMap = function (array) {
+    return array.reduce((map, obj) => {
+        obj.name = null;
+        map.set(obj.id, obj);
+        return map;
+    }, new Map());
+}
+
+const mapToArray = function (map) {
+    let array = []
+    map.forEach((value, key) => {
+        value.id = key;
+        array.push(value);
+    });
+    return array;
+}
+
+const fieldSorterOptimized = function (fields) {
+    var dir = [],
+        i,
+        l = fields.length;
+    fields = fields.map(function (o, i) {
+        if (o[0] === "-") {
+            dir[i] = -1;
+            o = o.substring(1);
+        } else {
+            dir[i] = 1;
+        }
+        return o;
+    });
+
+    return function (a, b) {
+        for (i = 0; i < l; i++) {
+            var o = fields[i];
+            if (a[o] > b[o]) return dir[i];
+            if (a[o] < b[o]) return -dir[i];
+        }
+        return 0;
+    };
+}
+
+const objectsEqual = (o1, o2) => {
+    var objectsAreSame = true;
+    for (var propertyName in o1) {
+        if (o1[propertyName] !== o2[propertyName]) {
+            objectsAreSame = false;
+            break;
+        }
+    }
+    return objectsAreSame;
+};
+
+const arraysObjEqual = function (a1, a2) {
+    return (a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx])));
+};
 
 /**
  * 
@@ -6,7 +60,7 @@ import { arrayToMap, fieldSorterOptimized, objectsEqual } from "./utilities";
  * @param {Boolean} mapScenes 
  * @returns {Array} Organized Path data
  */
-export const setPaths = function (data, mapScenes) {
+const setPaths = function (data, mapScenes) {
     //on ne garde que les données concernant un changement de scène
     const scene_changes = data.filter((d) => {
         const actual_scene = mapScenes.get(d.SceneName);
@@ -100,7 +154,7 @@ export const setPaths = function (data, mapScenes) {
  * @param {Boolean} merge_themes 
  * @returns Array computed path data
  */
-export const computePaths = function (paths, mapScenes, merge_themes) {
+const computePaths = function (paths, mapScenes, merge_themes) {
     let computedPaths = [];
     paths.forEach((p, id) => {
         //reduce path to array of scenes
@@ -111,7 +165,6 @@ export const computePaths = function (paths, mapScenes, merge_themes) {
         p.scenes.forEach((s) => {
             //ensure that the scene is allowed
             if (s.whitelisted) {
-                console.log(s.whitelisted)
                 //if it's the first scene of a path, add it's category, and register scene's personal data in scenes field
                 if (acc == -1) {
                     acc++;
@@ -263,7 +316,7 @@ export const computePaths = function (paths, mapScenes, merge_themes) {
  * @param {Map} mapScenes 
  * @returns 
  */
-export const analyseComputedPaths = function (computedPaths, mapScenes) {
+const analyseComputedPaths = function (computedPaths, mapScenes) {
     // console.log(computedPaths);
 
     computedPaths.forEach((uniquePath) => {
@@ -430,7 +483,7 @@ export const analyseComputedPaths = function (computedPaths, mapScenes) {
  * @param {Boolean} merge_themes 
  * @returns 
  */
-export const computeData = function (files, merge_themes) {
+const computeData = function (files, merge_themes) {
     let output = {}
 
     let mapScenes = arrayToMap(files.categories.arrayScenes)
@@ -495,6 +548,19 @@ export const computeData = function (files, merge_themes) {
 
     output.paths = setPaths(output.detail_usage_output, mapScenes);
     output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);
-    console.log(output)
     return output
+}
+
+
+
+onmessage = (e) => {
+    let message = {}
+    if (e.data.order == "computeData") {
+        message = computeData(e.data.files, e.data.merge_themes)
+    } else if (e.data.order = "computePaths") {
+        message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
+    }
+    message.order = e.data.order
+    postMessage(message)
+
 }

@@ -29,8 +29,6 @@
 </template>
 
 <script>
-import { computeData, computePaths } from "./compute";
-
 import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
@@ -40,6 +38,7 @@ import { sidebarWidth } from "@/components/Sidebar/state";
 
 import Header from "./components/Header.vue";
 import FileLoader from "./components/FileLoader.vue";
+import { arrayToMap, mapToArray } from "./utilities";
 
 export default {
   name: "App",
@@ -53,6 +52,7 @@ export default {
   },
   data() {
     return {
+      computeWorker: Worker,
       //page to show
       display: "all",
       //raw general file
@@ -98,24 +98,49 @@ export default {
     return { sidebarWidth };
   },
   created() {
-    return;
+    this.computeWorker = new Worker("/compute.js");
+    this.computeWorker.onmessage = (e) => {
+      if (e.data.order == "computeData") {
+        this.scenes = e.data.scenes;
+        this.categories = e.data.categories;
+        this.themes = e.data.themes;
+        this.paths = e.data.paths;
+        this.detail_usage_output = e.data.detail_usage_output;
+        this.general_usage_output = e.data.general_usage_output;
+        this.computedPaths = e.data.computedPaths;
+      } else if (e.data.order == "computePaths") {
+        this.computedPaths = e.data.computedPaths;
+      }
+    };
   },
   methods: {
     updateAndComputePaths(e) {
-      this.updatePathsWhitelist(this.paths);
-      this.computedPaths = computePaths(
-        this.paths,
-        this.scenes,
-        this.merge_themes
+      this.updatePathsWhitelist(this.paths)
+      //Ugly hack for proxy object cloning
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "computePaths",
+            paths: this.paths,
+            scenes: mapToArray(this.scenes),
+            merge_themes: this.merge_themes,
+          })
+        )
       );
     },
 
     mergeThematic(e) {
       this.merge_themes = e;
-      this.computedPaths = computePaths(
-        this.paths,
-        this.scenes,
-        this.merge_themes
+      //Ugly hack for proxy object cloning
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "computePaths",
+            paths: this.paths,
+            scenes: mapToArray(this.scenes),
+            merge_themes: this.merge_themes,
+          })
+        )
       );
     },
 
@@ -133,14 +158,11 @@ export default {
     },
 
     computeData(files) {
-      let dataComputed = computeData(files, this.merge_themes);
-      this.scenes = dataComputed.scenes;
-      this.categories = dataComputed.categories;
-      this.themes = dataComputed.themes;
-      this.paths = dataComputed.paths;
-      this.detail_usage_output = dataComputed.detail_usage_output;
-      this.general_usage_output = dataComputed.general_usage_output;
-      this.computedPaths = dataComputed.computedPaths;
+      this.computeWorker.postMessage({
+        order: "computeData",
+        files,
+        merge_themes: this.merge_themes,
+      });
     },
   },
 };

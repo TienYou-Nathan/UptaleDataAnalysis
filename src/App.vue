@@ -150,7 +150,8 @@ export default {
 
     updatePathsWhitelist(paths) {
       paths.forEach((p) => {
-        //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
+      //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
+      paths.forEach((p) => {
         p.scenes.forEach((e) => {
           e.whitelisted = this.categories.get(e.category).whitelisted;
         });

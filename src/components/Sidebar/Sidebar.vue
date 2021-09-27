@@ -33,7 +33,7 @@ export default {
     >
     <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'categories')"
-      icon="fa-solid fa-sitemap"
+      icon="fas fa-edit"
       >Catergories Setup</SidebarLink
     >
 
@@ -65,7 +65,6 @@ export default {
   top: 0;
   left: 0;
   bottom: 0;
-  padding: 0.5em;
   transition: 0.3s ease;
   display: flex;
   flex-direction: column;

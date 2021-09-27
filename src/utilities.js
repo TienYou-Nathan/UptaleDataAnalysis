@@ -53,3 +53,9 @@ export const objectsEqual = (o1, o2) => {
 export const arraysObjEqual = function (a1, a2) {
     return (a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx])));
 };
+
+export const getCookie = function (allCookies, index) {
+    return allCookies.split('; ')
+        .find(row => row.startsWith(index + '='))
+        .split('=')[1];
+}

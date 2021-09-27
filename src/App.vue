@@ -2,8 +2,12 @@
   <Sidebar @sidebar_click="sidebarManager" />
 
   <div id="nav" :style="{ 'margin-left': sidebarWidth }">
-    <Header title="VR@COVID Paths Analysis" />
-    <FileLoader @filesLoaded="computeData" :fields="fields" />
+    <Header
+      title="VR@COVID Paths Analysis"
+      :fields="fields"
+      @filesLoaded="computeData"
+      :isLoading="isLoading"
+    />
 
     <div v-if="display == 'all'">
       <AllRoutes :paths="paths" />
@@ -36,15 +40,14 @@ import SceneList from "./components/Categories/SceneList.vue";
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
 
-import Header from "./components/Header.vue";
-import FileLoader from "./components/FileLoader.vue";
+import Header from "./components/Header/Header.vue";
+
 import { arrayToMap, mapToArray } from "./utilities";
 
 export default {
   name: "App",
   components: {
     Header,
-    FileLoader,
     ComputedRoutes,
     AllRoutes,
     Sidebar,
@@ -69,6 +72,8 @@ export default {
       categories: [],
       //data about each theme
       themes: [],
+
+      isLoading: false,
       //option for computed paths
       merge_themes: false,
       //data files loaded
@@ -100,6 +105,7 @@ export default {
   created() {
     this.computeWorker = new Worker("/compute.js");
     this.computeWorker.onmessage = (e) => {
+      this.isLoading = false;
       if (e.data.order == "computeData") {
         this.scenes = e.data.scenes;
         this.categories = e.data.categories;
@@ -115,7 +121,8 @@ export default {
   },
   methods: {
     updateAndComputePaths(e) {
-      this.updatePathsWhitelist(this.paths)
+      this.isLoading = true;
+      this.updatePathsWhitelist(this.paths);
       //Ugly hack for proxy object cloning
       this.computeWorker.postMessage(
         JSON.parse(
@@ -130,6 +137,7 @@ export default {
     },
 
     mergeThematic(e) {
+      this.isLoading = true;
       this.merge_themes = e;
       //Ugly hack for proxy object cloning
       this.computeWorker.postMessage(
@@ -149,7 +157,6 @@ export default {
     },
 
     updatePathsWhitelist(paths) {
-      paths.forEach((p) => {
       //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
       paths.forEach((p) => {
         p.scenes.forEach((e) => {
@@ -159,6 +166,7 @@ export default {
     },
 
     computeData(files) {
+      this.isLoading = true;
       this.computeWorker.postMessage({
         order: "computeData",
         files,
@@ -176,9 +184,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 #nav {
-  padding: 30px;
+  transition: 0.3s ease;
 }
 </style>

@@ -1,14 +1,14 @@
 <script>
-import SidebarLink from './SidebarLink'
-import { collapsed, toggleSidebar, sidebarWidth } from './state'
+import SidebarLink from "./SidebarLink";
+import { collapsed, toggleSidebar, sidebarWidth } from "./state";
 export default {
-    emits : ['sidebar_click'],
-    props: {},
-    components: { SidebarLink },
-    setup() {
-        return { collapsed, toggleSidebar, sidebarWidth }
-    }
-}
+  emits: ["sidebar_click"],
+  props: {},
+  components: { SidebarLink },
+  setup() {
+    return { collapsed, toggleSidebar, sidebarWidth };
+  },
+};
 </script>
 
 <template>
@@ -21,10 +21,21 @@ export default {
       <span v-else>Vue Sidebar</span>
     </h1>
 
-    <SidebarLink @sidebar_click='$emit("sidebar_click", "all")' icon="fas fa-home">All Routes</SidebarLink>
-    <SidebarLink @sidebar_click='$emit("sidebar_click", "compute")' icon="fas fa-columns">Computed Routes</SidebarLink>
-    <SidebarLink @sidebar_click='$emit("sidebar_click", "map")' icon="fas fa-chart-bar">Route Map</SidebarLink>
-    <SidebarLink @sidebar_click='$emit("sidebar_click", "categories")' icon="fa-solid fa-sitemap">Catergories Setup</SidebarLink>
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'all')"
+      icon="fas fa-home"
+      >All Routes</SidebarLink
+    >
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'compute')"
+      icon="fas fa-columns"
+      >Computed Routes</SidebarLink
+    >
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'categories')"
+      icon="fa-solid fa-sitemap"
+      >Catergories Setup</SidebarLink
+    >
 
     <span
       class="collapse-icon"
@@ -74,18 +85,3 @@ export default {
   transition: 0.2s linear;
 }
 </style>
-
-    © 2021 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Docs
-
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-

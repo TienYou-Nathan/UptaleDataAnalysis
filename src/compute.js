@@ -1,7 +1,15 @@
-export const setPaths = function (data) {
+import { arrayToMap, fieldSorterOptimized, objectsEqual } from "./utilities";
+
+/**
+ * 
+ * @param {Array} data raw Path data
+ * @param {Boolean} mapScenes 
+ * @returns {Array} Organized Path data
+ */
+export const setPaths = function (data, mapScenes) {
     //on ne garde que les données concernant un changement de scène
     const scene_changes = data.filter((d) => {
-        const actual_scene = this.scenes.get(d.SceneName);
+        const actual_scene = mapScenes.get(d.SceneName);
         return (
             (d.EventName == "Launch_ChangeWorld" &&
                 actual_scene != undefined &&
@@ -49,8 +57,8 @@ export const setPaths = function (data) {
                             enterTime: startW.EventTime,
                             scene: startW.SceneName,
                             fromScene: startW.FromSceneName,
-                            category: this.scenes.get(startW.SceneName).category,
-                            theme: this.scenes.get(startW.SceneName).theme,
+                            category: mapScenes.get(startW.SceneName).category,
+                            theme: mapScenes.get(startW.SceneName).theme,
                             whitelisted: true,
                             duration: e.EventTime - startW.EventTime,
                             zonesFound: zoneFoundList,
@@ -64,8 +72,8 @@ export const setPaths = function (data) {
                     enterTime: startW.EventTime,
                     scene: startW.SceneName,
                     fromScene: startW.FromSceneName,
-                    category: this.scenes.get(startW.SceneName).category,
-                    theme: this.scenes.get(startW.SceneName).theme,
+                    category: mapScenes.get(startW.SceneName).category,
+                    theme: mapScenes.get(startW.SceneName).theme,
                     whitelisted: true,
                     duration: e.EventTime - startW.EventTime,
                     zonesFound: zoneFoundList,
@@ -82,10 +90,17 @@ export const setPaths = function (data) {
             endW = undefined;
         }
     });
-    this.paths = paths;
-},
+    return paths;
+}
 
-export const computePaths = function (paths) {
+/**
+ * 
+ * @param {Array} paths Organized path data
+ * @param {Map} mapScenes Map of available scenes
+ * @param {Boolean} merge_themes 
+ * @returns Array computed path data
+ */
+export const computePaths = function (paths, mapScenes, merge_themes) {
     let computedPaths = [];
     paths.forEach((p, id) => {
         //reduce path to array of scenes
@@ -96,6 +111,7 @@ export const computePaths = function (paths) {
         p.scenes.forEach((s) => {
             //ensure that the scene is allowed
             if (s.whitelisted) {
+                console.log(s.whitelisted)
                 //if it's the first scene of a path, add it's category, and register scene's personal data in scenes field
                 if (acc == -1) {
                     acc++;
@@ -108,7 +124,7 @@ export const computePaths = function (paths) {
                     path.push({
                         id: acc,
                         category: s.category,
-                        theme: this.merge_themes ? "---" : s.theme,
+                        theme: merge_themes ? "---" : s.theme,
                         scenes: [
                             {
                                 name: s.scene,
@@ -124,7 +140,7 @@ export const computePaths = function (paths) {
                     //check if the scne has the same properties (category and theme based on options) of the previous one in the list
                     const obj1 = { category: path[acc].category };
                     const obj2 = { category: s.category };
-                    if (!this.merge_themes) {
+                    if (!merge_themes) {
                         obj1.theme = path[acc].theme;
                         obj2.theme = s.theme;
                     }
@@ -140,7 +156,7 @@ export const computePaths = function (paths) {
                         path.push({
                             id: acc,
                             category: s.category,
-                            theme: this.merge_themes ? "---" : s.theme,
+                            theme: merge_themes ? "---" : s.theme,
                             scenes: [
                                 {
                                     name: s.scene,
@@ -236,13 +252,18 @@ export const computePaths = function (paths) {
     computedPaths = computedPaths.sort((a, b) =>
         a.proportion < b.proportion ? 1 : b.proportion < a.proportion ? -1 : 0
     );
-    this.analyseComputedPaths(computedPaths);
     // console.log("Computed Path");
     // console.log(computedPaths);
-    this.computedPaths = computedPaths;
-},
+    return analyseComputedPaths(computedPaths, mapScenes);;
+}
 
-export const analyseComputedPaths = function (computedPaths) {
+/**
+ * 
+ * @param {Array} computedPaths 
+ * @param {Map} mapScenes 
+ * @returns 
+ */
+export const analyseComputedPaths = function (computedPaths, mapScenes) {
     // console.log(computedPaths);
 
     computedPaths.forEach((uniquePath) => {
@@ -256,7 +277,7 @@ export const analyseComputedPaths = function (computedPaths) {
                         scene.zonesFound.length > 0 ||
                         pathEntry.category != "chambre_entrainement"
                     ) {
-                        const currentTheme = this.scenes.get(scene.name).theme;
+                        const currentTheme = mapScenes.get(scene.name).theme;
                         let themeIndex = pathEntry.thematicsData.findIndex(
                             (e) => e.theme == currentTheme
                         );
@@ -399,18 +420,29 @@ export const analyseComputedPaths = function (computedPaths) {
             });
         });
     });
-},
 
-export const computeData = function (files) {
-    this.general_usage_output = files.general;
+    return computedPaths;
+}
+
+/**
+ * 
+ * @param {Object} files 
+ * @param {Boolean} merge_themes 
+ * @returns 
+ */
+export const computeData = function (files, merge_themes) {
+    let output = {}
+
+    let mapScenes = arrayToMap(files.categories.arrayScenes)
+    output.general_usage_output = files.general;
     // console.log(files.categories);
-    this.categories = arrayToMap(files.categories.arrayCategories);
-    this.themes = arrayToMap(files.categories.arrayThemes);
-    this.scenes = arrayToMap(files.categories.arrayScenes);
+    output.categories = arrayToMap(files.categories.arrayCategories);
+    output.themes = arrayToMap(files.categories.arrayThemes);
+    output.scenes = arrayToMap(files.categories.arrayScenes);
 
     //suppressing duplicate data due to an Uptale bug
     //daplicate matches EventTime, EventName and SessionID
-    this.detail_usage_output = files["detail"].reduce(
+    output.detail_usage_output = files["detail"].reduce(
         (accumulator, current) => {
             if (checkIfAlreadyExist(current)) {
                 return accumulator;
@@ -432,12 +464,12 @@ export const computeData = function (files) {
     );
 
     //format EventTime to Date format
-    this.detail_usage_output.forEach((e) => {
+    output.detail_usage_output.forEach((e) => {
         e.EventTime = new Date(e.EventTime);
     });
 
     //sort data by sessionID and Date to ensure events are in correct order
-    this.detail_usage_output = this.detail_usage_output.sort(
+    output.detail_usage_output = output.detail_usage_output.sort(
         fieldSorterOptimized(["SessionId", "EventTime"])
     );
 
@@ -445,7 +477,7 @@ export const computeData = function (files) {
     //due to uptale bug when VR helmet is put in rest mode
     let currentId = undefined;
     let sessionClosed = false;
-    this.detail_usage_output = this.detail_usage_output.filter((e) => {
+    output.detail_usage_output = output.detail_usage_output.filter((e) => {
         if (currentId == e.SessionId) {
             if (sessionClosed) {
                 return false;
@@ -461,6 +493,8 @@ export const computeData = function (files) {
         return true;
     });
 
-    this.setPaths(this.detail_usage_output);
-    this.computePaths(this.paths);
-},
+    output.paths = setPaths(output.detail_usage_output, mapScenes);
+    output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);
+    console.log(output)
+    return output
+}

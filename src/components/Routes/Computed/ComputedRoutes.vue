@@ -2,7 +2,7 @@
   <div />
   <Legend @check="legendSelector" :categories="mapToArray(categories)" />
   <Checkbox @check="mergeThematic" :name="'Merge thematics'" />
-  <Paths :paths="computedPaths" :display="'compute'" />
+  <Paths :paths="computedPaths" :display="'compute'" :categories="categories" />
 </template>
 
 <script>

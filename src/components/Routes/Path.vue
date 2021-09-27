@@ -24,10 +24,7 @@
     <div v-if="display == 'compute'" class="scenes_path">
       <div :key="scene.id" v-for="scene in path.path" class="scenes_path">
         <i class="fas fa-arrow-right" />
-        <SceneInPathComputed
-          :scene="scene"
-          :categoriesInfo="categoriesInfo: [],"
-        />
+        <SceneInPathComputed :scene="scene" :categoriesInfo="categories" />
       </div>
     </div>
   </div>
@@ -46,6 +43,7 @@ export default {
   props: {
     path: Object,
     display: String,
+    categories: Map,
   },
 };
 </script>

@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { arrayToMap } from "./utilities";
+import { computeData, computePaths } from "./compute";
 
 import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
@@ -101,21 +101,22 @@ export default {
     return;
   },
   methods: {
-    maptoarray(m) {
-      let arr = [];
-      for (const value of m.values()) {
-        arr.push(value);
-      }
-      return arr;
-    },
     updateAndComputePaths(e) {
       this.updatePathsWhitelist(this.paths);
-      this.computePaths(this.paths);
+      this.computedPaths = computePaths(
+        this.paths,
+        this.scenes,
+        this.merge_themes
+      );
     },
 
     mergeThematic(e) {
       this.merge_themes = e;
-      this.computePaths(this.paths);
+      this.computedPaths = computePaths(
+        this.paths,
+        this.scenes,
+        this.merge_themes
+      );
     },
 
     sidebarManager(to) {
@@ -124,15 +125,22 @@ export default {
 
     updatePathsWhitelist(paths) {
       paths.forEach((p) => {
-        this.updatePathWhiteList(p.scenes);
+        //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
+        p.scenes.forEach((e) => {
+          e.whitelisted = this.categories.get(e.category).whitelisted;
+        });
       });
     },
 
-    //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
-    updatePathWhiteList(path) {
-      path.forEach((e) => {
-        e.whitelisted = this.categories.get(e.category).whitelisted;
-      });
+    computeData(files) {
+      let dataComputed = computeData(files, this.merge_themes);
+      this.scenes = dataComputed.scenes;
+      this.categories = dataComputed.categories;
+      this.themes = dataComputed.themes;
+      this.paths = dataComputed.paths;
+      this.detail_usage_output = dataComputed.detail_usage_output;
+      this.general_usage_output = dataComputed.general_usage_output;
+      this.computedPaths = dataComputed.computedPaths;
     },
   },
 };

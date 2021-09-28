@@ -514,39 +514,34 @@ const computeData = function (files, merge_themes) {
     );
 
 
-    console.log(files["detail"].reduce(
+    // console.log(files["detail"].reduce(
+    //     (accumulator, current) => {
+    //         if (checkIfAlreadyExist(current)) {
+    //             return accumulator;
+    //         } else {
+    //             return [...accumulator, current];
+    //         }
+
+    //         function checkIfAlreadyExist(currentVal) {
+    //             return accumulator.some((item) => {
+    //                 return (
+    //                     item.EventTime === currentVal.EventTime &&
+    //                     item.EventName === currentVal.EventName &&
+    //                     item.SessionId === currentVal.SessionId
+    //                 );
+    //             });
+    //         }
+    //     },
+    //     []
+    // ))
+
+    output.detail_usage_output = Object.values(output.detail_usage_output.reduce(
         (accumulator, current) => {
-            if (checkIfAlreadyExist(current)) {
-                return accumulator;
-            } else {
-                return [...accumulator, current];
-            }
-
-            function checkIfAlreadyExist(currentVal) {
-                return accumulator.some((item) => {
-                    return (
-                        item.EventTime === currentVal.EventTime &&
-                        item.EventName === currentVal.EventName &&
-                        item.SessionId === currentVal.SessionId
-                    );
-                });
-            }
-        },
-        []
-    ))
-
-    let temp = {}
-    output.detail_usage_output = output.detail_usage_output.reduce(
-        (accumulator, current, currentIndex, array) => {
-            if (!objectsEqual(current, temp)) {
-                temp = current
-                return [...accumulator, current]
-            }
+            accumulator[current.SessionId + "|" + JSON.stringify(current.EventTime) + "|" + current.EventName] = current
             return accumulator
         },
-        []
-    );
-    delete temp
+        {}
+    ));
 
 
     //format EventTime to Date format

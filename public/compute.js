@@ -315,7 +315,10 @@ const computePaths = function (paths, mapScenes, merge_themes) {
 
     console.log("Computed Path");
     console.log(computedPaths);
-    return analyseComputedPaths(computedPaths, mapScenes);;
+
+    const test = extractScorePerPath(computedPaths)
+
+    return analyseComputedPaths(computedPaths, mapScenes);
 }
 
 /**
@@ -492,20 +495,34 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
  */
 const extractScorePerPath = computedPaths => {
     let result = [];
-    let users = [];
+    
 
     computedPaths.forEach(compPath => {
         let pathScores = []
+        let users = [];
 
         compPath.path.forEach(p => {
             p.scenes.forEach(s => {
+                let actualUser=undefined;
+
                 s.forEach(d => {
-                   let test = d.name==false;
-                })
+
+                    actualUser==undefined?actualUser={name : s.username, scenes: []}:actualUser;
+                    actualUser.scenes.push({
+                        name: d.name,
+                        zonesFound: d.zonesFound,
+                        zonesScored: d.zonesScored
+                    });
+
+                    users.push(actualUser);
+
+                });
             })
         })
 
-        result.push[{id : compPath.id, data : pathScores}]
+        result.push[{id : compPath.id, users: users, data : pathScores}]
+        console.log('result')
+        console.log(result)
     })
 
     return result;

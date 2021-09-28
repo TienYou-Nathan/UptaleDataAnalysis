@@ -46,7 +46,7 @@ import { sidebarWidth } from "@/components/Sidebar/state";
 
 import Header from "./components/Header/Header.vue";
 
-import { arrayToMap, mapToArray } from "./utilities";
+import { wait, mapToArray } from "./utilities";
 
 export default {
   name: "App",
@@ -77,8 +77,7 @@ export default {
       //data about each theme
       themes: [],
 
-      csvData: "",
-      isLoading: false,
+      isLoading: 0,
       //option for computed paths
       merge_themes: false,
       //data files loaded
@@ -110,26 +109,26 @@ export default {
   created() {
     this.computeWorker = new Worker("/compute.js");
     this.computeWorker.onmessage = (e) => {
-      this.isLoading = false;
-      if (e.data.order == "computeData") {
-        this.scenes = e.data.scenes;
-        this.categories = e.data.categories;
-        this.themes = e.data.themes;
-        this.paths = e.data.paths;
-        this.detail_usage_output = e.data.detail_usage_output;
-        this.general_usage_output = e.data.general_usage_output;
-        this.computedPaths = e.data.computedPaths;
-
-        this.csvData = d3.csvFormat(this.detail_usage_output);
-        console.log(this.csvData);
-      } else if (e.data.order == "computePaths") {
-        this.computedPaths = e.data.computedPaths;
-      }
+      this.isLoading = 2;
+      wait(1).then(() => {
+        if (e.data.order == "computeData") {
+          this.scenes = e.data.scenes;
+          this.categories = e.data.categories;
+          this.themes = e.data.themes;
+          this.paths = e.data.paths;
+          this.detail_usage_output = e.data.detail_usage_output;
+          this.general_usage_output = e.data.general_usage_output;
+          this.computedPaths = e.data.computedPaths;
+        } else if (e.data.order == "computePaths") {
+          this.computedPaths = e.data.computedPaths;
+        }
+        this.isLoading = 0;
+      });
     };
   },
   methods: {
     updateAndComputePaths(e) {
-      this.isLoading = true;
+      this.isLoading = 1;
       this.updatePathsWhitelist(this.paths);
       //Ugly hack for proxy object cloning
       this.computeWorker.postMessage(
@@ -145,7 +144,7 @@ export default {
     },
 
     mergeThematic(e) {
-      this.isLoading = true;
+      this.isLoading = 1;
       this.merge_themes = e;
       //Ugly hack for proxy object cloning
       this.computeWorker.postMessage(
@@ -174,7 +173,7 @@ export default {
     },
 
     computeData(files) {
-      this.isLoading = true;
+      this.isLoading = 1;
       this.computeWorker.postMessage({
         order: "computeData",
         files,

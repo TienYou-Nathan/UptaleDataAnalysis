@@ -41,7 +41,7 @@ export default {
       default: "[Insert Title here]",
     },
     csvData: String,
-    isLoading: Boolean,
+    isLoading: Number,
     fields: {},
   },
   methods: {

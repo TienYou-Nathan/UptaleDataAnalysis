@@ -59,3 +59,11 @@ export const getCookie = function (allCookies, index) {
         .find(row => row.startsWith(index + '='))
         .split('=')[1];
 }
+
+export const wait = function (milliseconds) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, milliseconds)
+    })
+}

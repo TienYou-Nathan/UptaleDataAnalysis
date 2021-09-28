@@ -100,7 +100,6 @@ const setPaths = function (data, mapScenes) {
             const i = paths.findIndex((d) => startW.SessionId == d.id);
             //si la session actuelle n'est pas enregistrée, on crée une nouvelle entrée
             if (i == -1) {
-
                 paths.push({
                     id: startW.SessionId,
                     name: startW.LearnerName,
@@ -541,16 +540,18 @@ const computeData = function (files, merge_themes) {
         return acc
     }, {}))
 
-    console.log(availableScenes)
-    return
-
-    if (files.categories.arrayScenes.length > 0) {
-        output.scenes = arrayToMap(files.categories.arrayScenes);
-    }
-
-    console.log(output.detail_usage_output)
-    return;
-
+    //Get scenes array from JSON
+    let registeredScenes = files.categories.arrayScenes.reduce((acc, e) => {
+        acc.push(e.id)
+        return acc
+    }, [])
+    //get available but not registered scenes
+    let missingScenes = availableScenes.filter(x => !registeredScenes.includes(x))
+    missingScenes.forEach(e => {
+        files.categories.arrayScenes.push({ id: e, category: "defaultCategory", theme: "defaultTheme", whitelisted: true })
+    })
+    console.log(files.categories.arrayScenes)
+    output.scenes = arrayToMap(files.categories.arrayScenes)
     output.themes = arrayToMap(files.categories.arrayThemes);
     output.categories = arrayToMap(files.categories.arrayCategories);
 

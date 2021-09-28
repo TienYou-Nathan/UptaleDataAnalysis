@@ -50,6 +50,16 @@ const objectsEqual = (o1, o2) => {
     return objectsAreSame;
 };
 
+const objectsEqualByAttribute = (o1, o2, attributes) => {
+    var objectsAreSame = true;
+    attributes.forEach(propertyName => {
+        if (o1[propertyName] !== o2[propertyName]) {
+            objectsAreSame = false;
+        }
+    })
+    return objectsAreSame;
+};
+
 const arraysObjEqual = function (a1, a2) {
     return (a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx])));
 };
@@ -75,13 +85,14 @@ const setPaths = function (data, mapScenes) {
     });
 
     let paths = [];
-
     let startW = undefined; //event entering the scene
     let zoneFoundList = []; //list of zones found during the scene
     let zoneScoreList = []; //list of zone found and question correctly answered
     let endW = undefined; //event leaving the scene
-
+    console.log(mapScenes)
     scene_changes.forEach((e) => {
+        // console.log(startW)
+        // console.log(e)
         if (startW == undefined) {
             startW = e;
         } else if (e.EventName == "Launch_WinStar") {
@@ -99,10 +110,10 @@ const setPaths = function (data, mapScenes) {
             e.EventName == "Launch_CloseSession"
         ) {
             endW = e;
-
             const i = paths.findIndex((d) => startW.SessionId == d.id);
-            //si la session actuelle n'est pas enregistrées, on crée une nouvelle entrée
+            //si la session actuelle n'est pas enregistrée, on crée une nouvelle entrée
             if (i == -1) {
+
                 paths.push({
                     id: startW.SessionId,
                     name: startW.LearnerName,
@@ -122,6 +133,8 @@ const setPaths = function (data, mapScenes) {
                 });
                 //si la session actuelle possède une entrée, on rajoute un scène à son parcours
             } else {
+
+
                 paths[i].scenes.push({
                     enterTime: startW.EventTime,
                     scene: startW.SceneName,
@@ -495,7 +508,13 @@ const computeData = function (files, merge_themes) {
 
     //suppressing duplicate data due to an Uptale bug
     //daplicate matches EventTime, EventName and SessionID
-    output.detail_usage_output = files["detail"].reduce(
+
+    output.detail_usage_output = files["detail"].sort(
+        fieldSorterOptimized(["SessionId", "EventTime", "EventName"])
+    );
+
+
+    console.log(files["detail"].reduce(
         (accumulator, current) => {
             if (checkIfAlreadyExist(current)) {
                 return accumulator;
@@ -514,17 +533,30 @@ const computeData = function (files, merge_themes) {
             }
         },
         []
+    ))
+
+    let temp = {}
+    output.detail_usage_output = output.detail_usage_output.reduce(
+        (accumulator, current, currentIndex, array) => {
+            if (!objectsEqual(current, temp)) {
+                temp = current
+                return [...accumulator, current]
+            }
+            return accumulator
+        },
+        []
     );
+    delete temp
+
 
     //format EventTime to Date format
     output.detail_usage_output.forEach((e) => {
         e.EventTime = new Date(e.EventTime);
     });
 
+
+    console.log(output.detail_usage_output)
     //sort data by sessionID and Date to ensure events are in correct order
-    output.detail_usage_output = output.detail_usage_output.sort(
-        fieldSorterOptimized(["SessionId", "EventTime"])
-    );
 
     //remove all events in a session that fires after a Session_Close event
     //due to uptale bug when VR helmet is put in rest mode
@@ -545,6 +577,10 @@ const computeData = function (files, merge_themes) {
         }
         return true;
     });
+
+
+
+    console.log(output.detail_usage_output)
 
     output.paths = setPaths(output.detail_usage_output, mapScenes);
     output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);

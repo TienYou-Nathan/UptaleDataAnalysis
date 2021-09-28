@@ -170,6 +170,7 @@ export default {
 
     computeData(files) {
       this.isLoading = true;
+      console.log(files);
       this.computeWorker.postMessage({
         order: "computeData",
         files,

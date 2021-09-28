@@ -316,7 +316,7 @@ const computePaths = function (paths, mapScenes, merge_themes) {
     console.log("Computed Path");
     console.log(computedPaths);
 
-    const test = extractScorePerPath(computedPaths)
+    const test = extractScorePerPath(computedPaths, mapScenes)
 
     return analyseComputedPaths(computedPaths, mapScenes);
 }
@@ -491,40 +491,80 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
 
 /**
  * @param {Array} computedPaths
+ * @param {Map} mapScenes
  * @returns {Array} result 
  */
-const extractScorePerPath = computedPaths => {
+const extractScorePerPath = (computedPaths,mapScenes) => {
+
+    const targetCategory='chambre_entrainement';
     let result = [];
-    
+    let analysedScenes = [];
+
+    //contract all tag per scene in a scructure
+    mapScenes.forEach((value, key)=>{
+        if(value.category==targetCategory)analysedScenes.push({id: key, zones: []})
+    });
+    computedPaths.forEach(compPath => {
+        compPath.path.filter(p => p.category==targetCategory).forEach(p => {
+            p.scenes.forEach(s => {
+                s.forEach(d => {
+                    d.zonesFound.forEach(z=>{
+                        if(analysedScenes.find(el=> el.id==d.name).zones.findIndex(el=>z.tag==el.tag)==-1){
+                            analysedScenes.find(el=> el.id==d.name).zones.push({
+                                tag : z.tag,
+                                founded : 0,
+                                scored : 0
+                            })
+                        }
+                    })
+                });
+            })
+        })
+    })
 
     computedPaths.forEach(compPath => {
-        let pathScores = []
+        //extract score details per user
         let users = [];
-
-        compPath.path.forEach(p => {
+        compPath.path.filter(p => p.category==targetCategory).forEach(p => {
             p.scenes.forEach(s => {
-                let actualUser=undefined;
+                let actualUser={name : s[0].username, scenes: []};
 
                 s.forEach(d => {
 
-                    actualUser==undefined?actualUser={name : s.username, scenes: []}:actualUser;
                     actualUser.scenes.push({
                         name: d.name,
                         zonesFound: d.zonesFound,
                         zonesScored: d.zonesScored
                     });
-
-                    users.push(actualUser);
-
                 });
+
+                users.push(actualUser);
             })
         })
 
-        result.push[{id : compPath.id, users: users, data : pathScores}]
-        console.log('result')
-        console.log(result)
-    })
+        //extract score data relative to the current path
+        analysedScenes.forEach(d => {
+            
+            users.forEach(u => {
+                u.scenes.forEach(s => {
+                    if(s.name==d.id){
+                        
+                        s.zonesFound.forEach(founded => {
+                            console.log(d.zones)
+                            d.zones.find(el => el.tag==founded.tag).founded++
+                        });
 
+                        s.zonesScored.forEach(scored => {
+                            d.zones.find(el => el.tag==scored.tag).scored++
+                        })
+
+                    }
+                })
+            })
+        })
+
+        result.push({id : compPath.id, users: users, data : analysedScenes})
+    })
     return result;
 }
 

@@ -75,12 +75,10 @@ const setPaths = function (data, mapScenes) {
     });
 
     let paths = [];
-
     let startW = undefined; //event entering the scene
     let zoneFoundList = []; //list of zones found during the scene
     let zoneScoreList = []; //list of zone found and question correctly answered
     let endW = undefined; //event leaving the scene
-
     scene_changes.forEach((e) => {
         if (startW == undefined) {
             startW = e;
@@ -99,10 +97,10 @@ const setPaths = function (data, mapScenes) {
             e.EventName == "Launch_CloseSession"
         ) {
             endW = e;
-
             const i = paths.findIndex((d) => startW.SessionId == d.id);
-            //si la session actuelle n'est pas enregistrées, on crée une nouvelle entrée
+            //si la session actuelle n'est pas enregistrée, on crée une nouvelle entrée
             if (i == -1) {
+
                 paths.push({
                     id: startW.SessionId,
                     name: startW.LearnerName,
@@ -122,6 +120,8 @@ const setPaths = function (data, mapScenes) {
                 });
                 //si la session actuelle possède une entrée, on rajoute un scène à son parcours
             } else {
+
+
                 paths[i].scenes.push({
                     enterTime: startW.EventTime,
                     scene: startW.SceneName,
@@ -488,39 +488,30 @@ const computeData = function (files, merge_themes) {
     console.log(files)
 
     output.general_usage_output = files.general;
+    output.detail_usage_output = files.detail;
+    output.categories = arrayToMap(files.categories.arrayCategories);
+    output.themes = arrayToMap(files.categories.arrayThemes);
+    output.scenes = arrayToMap(files.categories.arrayScenes);
 
     //suppressing duplicate data due to an Uptale bug
-    //daplicate matches EventTime, EventName and SessionID
-    output.detail_usage_output = files["detail"].reduce(
+    //duplicate matches EventTime, EventName and SessionID
+    output.detail_usage_output = Object.values(output.detail_usage_output.reduce(
         (accumulator, current) => {
-            if (checkIfAlreadyExist(current)) {
-                return accumulator;
-            } else {
-                return [...accumulator, current];
-            }
-
-            function checkIfAlreadyExist(currentVal) {
-                return accumulator.some((item) => {
-                    return (
-                        item.EventTime === currentVal.EventTime &&
-                        item.EventName === currentVal.EventName &&
-                        item.SessionId === currentVal.SessionId
-                    );
-                });
-            }
+            accumulator[current.SessionId + "|" + JSON.stringify(current.EventTime) + "|" + current.EventName] = current
+            return accumulator
         },
-        []
-    );
-
+        {}
+    ));
     //format EventTime to Date format
     output.detail_usage_output.forEach((e) => {
         e.EventTime = new Date(e.EventTime);
     });
 
-    //sort data by sessionID and Date to ensure events are in correct order
-    output.detail_usage_output = output.detail_usage_output.sort(
+    output.detail_usage_output = files["detail"].sort(
         fieldSorterOptimized(["SessionId", "EventTime"])
     );
+
+    //sort data by sessionID and Date to ensure events are in correct order
 
     //remove all events in a session that fires after a Session_Close event
     //due to uptale bug when VR helmet is put in rest mode
@@ -565,6 +556,7 @@ const computeData = function (files, merge_themes) {
 
     output.paths = setPaths(output.detail_usage_output, output.scenes);
     output.computedPaths = computePaths(output.paths, output.scenes, merge_themes);
+
     return output
 }
 

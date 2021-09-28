@@ -316,8 +316,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
     console.log("Computed Path");
     console.log(computedPaths);
 
-    const test = extractScorePerPath(computedPaths, mapScenes)
-
     return analyseComputedPaths(computedPaths, mapScenes);
 }
 
@@ -652,6 +650,8 @@ onmessage = (e) => {
         message = computeData(e.data.files, e.data.merge_themes)
     } else if (e.data.order = "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
+    } else if (e.data.order = "extractPathData"){
+        message.scorePerPathData = extractScorePerPath(e.data.paths, arrayToMap(e.data.scenes))
     }
     message.order = e.data.order
     postMessage(message)

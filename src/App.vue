@@ -32,6 +32,14 @@
         :mapThemes="themes"
       />
     </div>
+
+    <div v-if="display == 'scorePerPath'">
+      <SceneList
+        :mapScenes="scenes"
+        :mapCategories="categories"
+        :mapThemes="themes"
+      />
+    </div>
   </div>
 </template>
 
@@ -39,6 +47,7 @@
 import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
+import DataByPath from "./components/DataViz/DataByPath.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -55,6 +64,7 @@ export default {
     AllRoutes,
     Sidebar,
     SceneList,
+    DataByPath
   },
   data() {
     return {
@@ -69,6 +79,8 @@ export default {
       paths: [],
       //list of reduced and merged paths
       computedPaths: [],
+      scorePerPathData: [],
+
       //data about each scene
       scenes: [],
       //data about each categories
@@ -153,6 +165,10 @@ export default {
           })
         )
       );
+    },
+
+    extractScorePerPathData(e) {
+
     },
 
     sidebarManager(to) {

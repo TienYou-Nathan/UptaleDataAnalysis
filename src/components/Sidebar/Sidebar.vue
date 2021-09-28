@@ -37,6 +37,12 @@ export default {
       >Catergories Setup</SidebarLink
     >
 
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'scorePerPath')"
+      icon="far fa-chart-bar"
+      >Score per Path</SidebarLink
+    >
+
     <span
       class="collapse-icon"
       :class="{ 'rotate-180': collapsed }"

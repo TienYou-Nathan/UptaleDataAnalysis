@@ -10,6 +10,7 @@
       :mapScenes="scenes"
       :mapCategories="categories"
       :mapThemes="themes"
+      :csvData="csvData"
     />
 
     <div v-if="display == 'all'">
@@ -76,6 +77,7 @@ export default {
       //data about each theme
       themes: [],
 
+      csvData: "",
       isLoading: false,
       //option for computed paths
       merge_themes: false,
@@ -117,6 +119,9 @@ export default {
         this.detail_usage_output = e.data.detail_usage_output;
         this.general_usage_output = e.data.general_usage_output;
         this.computedPaths = e.data.computedPaths;
+
+        this.csvData = d3.csvFormat(this.detail_usage_output);
+        console.log(this.csvData);
       } else if (e.data.order == "computePaths") {
         this.computedPaths = e.data.computedPaths;
       }

@@ -10,6 +10,7 @@
       <i class="fas fa-upload icon"></i>
     </span>
     <a
+      class="icon"
       id="download"
       :href="
         'data:text/json;charset=utf-8,' +
@@ -23,6 +24,12 @@
       "
     >
       <i class="fas fa-download icon" @click="download"></i
+    ></a>
+    <a
+      class="icon"
+      id="downloadCSV"
+      :href="'data:text/csv;charset=utf-8,' + csvData"
+      ><i class="fas fa-file-csv"></i
     ></a>
   </div>
   <div id="uploadPrompt" v-if="currentWindow == 'upload'">
@@ -57,7 +64,7 @@ export default {
   name: "FileLoader",
   data() {
     return {
-      currentWindow: "upload",
+      currentWindow: "",
     };
   },
   props: {
@@ -73,6 +80,7 @@ export default {
       type: Map,
       default: [],
     },
+    csvData: String,
     isLoading: Boolean,
     fields: {
       type: Array,

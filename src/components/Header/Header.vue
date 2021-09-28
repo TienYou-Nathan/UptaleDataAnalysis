@@ -8,6 +8,7 @@
       :mapScenes="mapScenes"
       :mapCategories="mapCategories"
       :mapThemes="mapThemes"
+      :csvData="csvData"
     />
   </header>
 </template>
@@ -39,6 +40,7 @@ export default {
       type: String,
       default: "[Insert Title here]",
     },
+    csvData: String,
     isLoading: Boolean,
     fields: {},
   },

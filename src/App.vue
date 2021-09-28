@@ -3,7 +3,7 @@
 
   <div id='nav' :style="{ 'margin-left': sidebarWidth }">
     <Header title='VR@COVID Paths Analysis'/>
-    <FileLoader @filesLoaded="computeData"/>
+    <FileLoader @filesLoaded="computeData" :fields='fields'/>
 
   <div v-if='display=="all"'>
     <Paths :paths='paths' :display='display'/>
@@ -102,7 +102,17 @@ export default {
       //data about each categories
       categories : [],
       //option for computed paths
-      merge_themes : false
+      merge_themes : false,
+      //data files loaded
+      fields : [{
+        name: "general",
+        label: "Select general data file file here",
+        defaultPath: "/general.csv"
+      },{
+        name: "detail",
+        label: "Select detail data file file here",
+        defaultPath: "/detail.csv"
+      }]
     }
   },
   setup() {
@@ -439,11 +449,11 @@ export default {
 
     computeData(files){
 
-      this.general_usage_output = files.general;
+      this.general_usage_output = files["general"];
 
       //suppressing duplicate data due to an Uptale bug
       //daplicate matches EventTime, EventName and SessionID
-      this.detail_usage_output = files.detail.reduce((accumulator, current) => {
+      this.detail_usage_output = files["detail"].reduce((accumulator, current) => {
         if (checkIfAlreadyExist(current)) {
           return accumulator;
         } else {

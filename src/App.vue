@@ -77,6 +77,7 @@ export default {
       //data about each theme
       themes: [],
 
+      csvData: "",
       isLoading: 0,
       //option for computed paths
       merge_themes: false,

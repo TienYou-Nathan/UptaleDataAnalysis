@@ -5,6 +5,9 @@
       @filesLoaded="filesLoaded"
       :fields="fields"
       :isLoading="isLoading"
+      :mapScenes="mapScenes"
+      :mapCategories="mapCategories"
+      :mapThemes="mapThemes"
     />
   </header>
 </template>
@@ -20,6 +23,18 @@ export default {
     return {};
   },
   props: {
+    mapScenes: {
+      type: Map,
+      default: [],
+    },
+    mapCategories: {
+      type: Map,
+      default: [],
+    },
+    mapThemes: {
+      type: Map,
+      default: [],
+    },
     title: {
       type: String,
       default: "[Insert Title here]",

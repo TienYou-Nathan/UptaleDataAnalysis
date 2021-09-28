@@ -9,7 +9,21 @@
     <span @click="currentWindow = 'upload'">
       <i class="fas fa-upload icon"></i>
     </span>
-    <span><i class="fas fa-download icon" @click="download"></i></span>
+    <a
+      id="download"
+      :href="
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(
+          JSON.stringify({
+            arrayScenes: [...mapToArray(this.mapScenes)],
+            arrayCategories: [...mapToArray(this.mapCategories)],
+            arrayThemes: [...mapToArray(this.mapThemes)],
+          })
+        )
+      "
+    >
+      <i class="fas fa-download icon" @click="download"></i
+    ></a>
   </div>
   <div id="uploadPrompt" v-if="currentWindow == 'upload'">
     <div id="background" @click="currentWindow = null" />
@@ -37,6 +51,8 @@
 </template>
 
 <script>
+import { mapToArray } from "../../utilities";
+
 export default {
   name: "FileLoader",
   data() {
@@ -45,6 +61,18 @@ export default {
     };
   },
   props: {
+    mapScenes: {
+      type: Map,
+      default: [],
+    },
+    mapCategories: {
+      type: Map,
+      default: [],
+    },
+    mapThemes: {
+      type: Map,
+      default: [],
+    },
     isLoading: Boolean,
     fields: {
       type: Array,
@@ -87,7 +115,6 @@ export default {
 
       this.fields.forEach((f) => {
         let request = f.file;
-        console.log(request);
         query.push(
           request != undefined
             ? this.load_file(request)
@@ -111,6 +138,9 @@ export default {
       this.fields.find((field) => field.name == e.target.id).file =
         e.target.files[0];
     },
+    mapToArray(data) {
+      return mapToArray(data);
+    },
   },
 };
 </script>
@@ -129,7 +159,8 @@ export default {
 }
 
 #uploadPrompt {
-  position: absolute;
+  position: fixed;
+  z-index: 1;
   top: 0;
   bottom: 0;
   left: 0;

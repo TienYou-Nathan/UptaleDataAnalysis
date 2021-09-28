@@ -1,12 +1,4 @@
 <template>
-  <a
-    id="save"
-    @click="refreshSaveData"
-    :href="saveData"
-    download="sceneInfo.json"
-  >
-    Save Settings
-  </a>
   <form @submit="addCategory">
     <input id="categoryName" type="text" placeholder="add category" />
   </form>
@@ -61,14 +53,6 @@ export default {
     Scene,
     SceneProperty,
   },
-  data() {
-    return {
-      arrayScenes: [],
-      arrayCategories: [],
-      arrayThemes: [],
-      saveData: {},
-    };
-  },
   props: {
     mapScenes: {
       type: Map,
@@ -85,17 +69,6 @@ export default {
   },
   created() {},
   methods: {
-    refreshSaveDataURI() {
-      this.saveData =
-        "data:text/json;charset=utf-8," +
-        encodeURIComponent(
-          JSON.stringify({
-            arrayScenes: [...mapToArray(this.mapScenes)],
-            arrayCategories: [...mapToArray(this.mapCategories)],
-            arrayThemes: [...mapToArray(this.mapThemes)],
-          })
-        );
-    },
     addCategory(e) {
       e.preventDefault();
       this.mapCategories.set(

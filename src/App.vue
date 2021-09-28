@@ -7,6 +7,9 @@
       :fields="fields"
       @filesLoaded="computeData"
       :isLoading="isLoading"
+      :mapScenes="scenes"
+      :mapCategories="categories"
+      :mapThemes="themes"
     />
 
     <div v-if="display == 'all'">

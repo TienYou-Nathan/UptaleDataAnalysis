@@ -39,7 +39,7 @@ export default {
       type: String,
       default: "[Insert Title here]",
     },
-    isLoading: Boolean,
+    isLoading: Number,
     fields: {},
   },
   methods: {

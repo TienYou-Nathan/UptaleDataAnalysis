@@ -89,10 +89,7 @@ const setPaths = function (data, mapScenes) {
     let zoneFoundList = []; //list of zones found during the scene
     let zoneScoreList = []; //list of zone found and question correctly answered
     let endW = undefined; //event leaving the scene
-    console.log(mapScenes)
     scene_changes.forEach((e) => {
-        // console.log(startW)
-        // console.log(e)
         if (startW == undefined) {
             startW = e;
         } else if (e.EventName == "Launch_WinStar") {
@@ -501,40 +498,13 @@ const computeData = function (files, merge_themes) {
 
     let mapScenes = arrayToMap(files.categories.arrayScenes)
     output.general_usage_output = files.general;
-    // console.log(files.categories);
+    output.detail_usage_output = files.detail;
     output.categories = arrayToMap(files.categories.arrayCategories);
     output.themes = arrayToMap(files.categories.arrayThemes);
     output.scenes = arrayToMap(files.categories.arrayScenes);
 
     //suppressing duplicate data due to an Uptale bug
-    //daplicate matches EventTime, EventName and SessionID
-
-    output.detail_usage_output = files["detail"].sort(
-        fieldSorterOptimized(["SessionId", "EventTime", "EventName"])
-    );
-
-
-    // console.log(files["detail"].reduce(
-    //     (accumulator, current) => {
-    //         if (checkIfAlreadyExist(current)) {
-    //             return accumulator;
-    //         } else {
-    //             return [...accumulator, current];
-    //         }
-
-    //         function checkIfAlreadyExist(currentVal) {
-    //             return accumulator.some((item) => {
-    //                 return (
-    //                     item.EventTime === currentVal.EventTime &&
-    //                     item.EventName === currentVal.EventName &&
-    //                     item.SessionId === currentVal.SessionId
-    //                 );
-    //             });
-    //         }
-    //     },
-    //     []
-    // ))
-
+    //duplicate matches EventTime, EventName and SessionID
     output.detail_usage_output = Object.values(output.detail_usage_output.reduce(
         (accumulator, current) => {
             accumulator[current.SessionId + "|" + JSON.stringify(current.EventTime) + "|" + current.EventName] = current
@@ -542,15 +512,15 @@ const computeData = function (files, merge_themes) {
         },
         {}
     ));
-
-
     //format EventTime to Date format
     output.detail_usage_output.forEach((e) => {
         e.EventTime = new Date(e.EventTime);
     });
 
+    output.detail_usage_output = files["detail"].sort(
+        fieldSorterOptimized(["SessionId", "EventTime"])
+    );
 
-    console.log(output.detail_usage_output)
     //sort data by sessionID and Date to ensure events are in correct order
 
     //remove all events in a session that fires after a Session_Close event
@@ -573,9 +543,6 @@ const computeData = function (files, merge_themes) {
         return true;
     });
 
-
-
-    console.log(output.detail_usage_output)
 
     output.paths = setPaths(output.detail_usage_output, mapScenes);
     output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);

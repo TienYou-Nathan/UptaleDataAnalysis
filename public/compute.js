@@ -485,13 +485,9 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
  */
 const computeData = function (files, merge_themes) {
     let output = {}
+    console.log(files)
 
-    let mapScenes = arrayToMap(files.categories.arrayScenes)
     output.general_usage_output = files.general;
-    // console.log(files.categories);
-    output.categories = arrayToMap(files.categories.arrayCategories);
-    output.themes = arrayToMap(files.categories.arrayThemes);
-    output.scenes = arrayToMap(files.categories.arrayScenes);
 
     //suppressing duplicate data due to an Uptale bug
     //daplicate matches EventTime, EventName and SessionID
@@ -546,8 +542,29 @@ const computeData = function (files, merge_themes) {
         return true;
     });
 
-    output.paths = setPaths(output.detail_usage_output, mapScenes);
-    output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);
+    //Get scenes array from csv
+    let availableScenes = Object.keys(output.detail_usage_output.reduce((acc, e) => {
+        if (e.SceneId) {
+            acc[e.SceneId] = true
+        }
+        return acc
+    }, {}))
+
+    console.log(availableScenes)
+    return
+
+    if (files.categories.arrayScenes.length > 0) {
+        output.scenes = arrayToMap(files.categories.arrayScenes);
+    }
+
+    console.log(output.detail_usage_output)
+    return;
+
+    output.themes = arrayToMap(files.categories.arrayThemes);
+    output.categories = arrayToMap(files.categories.arrayCategories);
+
+    output.paths = setPaths(output.detail_usage_output, output.scenes);
+    output.computedPaths = computePaths(output.paths, output.scenes, merge_themes);
     return output
 }
 

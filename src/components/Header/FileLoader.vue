@@ -57,7 +57,7 @@ export default {
   name: "FileLoader",
   data() {
     return {
-      currentWindow: "upload",
+      currentWindow: "",
     };
   },
   props: {

@@ -61,85 +61,49 @@ const arraysObjEqual = function (a1, a2) {
  * @returns {Array} Organized Path data
  */
 const setPaths = function (data, mapScenes) {
-    //on ne garde que les données concernant un changement de scène
-    const scene_changes = data.filter((d) => {
-        const actual_scene = mapScenes.get(d.SceneName);
-        return (
-            (d.EventName == "Launch_ChangeWorld" &&
-                actual_scene != undefined &&
-                actual_scene.whitelisted) ||
-            d.EventName == "Launch_QcmAnswerClick" ||
-            d.EventName == "Launch_WinStar" ||
-            d.EventName == "Launch_CloseSession"
-        );
-    });
 
-    let paths = [];
-    let startW = undefined; //event entering the scene
-    let zoneFoundList = []; //list of zones found during the scene
-    let zoneScoreList = []; //list of zone found and question correctly answered
-    let endW = undefined; //event leaving the scene
-    scene_changes.forEach((e) => {
-        if (startW == undefined) {
-            startW = e;
-        } else if (e.EventName == "Launch_WinStar") {
-            zoneScoreList.push({
-                tag: e.TagName,
-                time: e.EventTime,
-            });
-        } else if (e.EventName == "Launch_QcmAnswerClick") {
-            zoneFoundList.push({
-                tag: e.TagName,
-                time: e.EventTime,
-            });
-        } else if (
-            e.EventName == "Launch_ChangeWorld" ||
-            e.EventName == "Launch_CloseSession"
-        ) {
-            endW = e;
-            const i = paths.findIndex((d) => startW.SessionId == d.id);
-            //si la session actuelle n'est pas enregistrée, on crée une nouvelle entrée
-            if (i == -1) {
-                paths.push({
-                    id: startW.SessionId,
-                    name: startW.LearnerName,
-                    scenes: [
-                        {
-                            enterTime: startW.EventTime,
-                            scene: startW.SceneName,
-                            fromScene: startW.FromSceneName,
-                            whitelisted: true,
-                            duration: e.EventTime - startW.EventTime,
-                            zonesFound: zoneFoundList,
-                            zonesScored: zoneScoreList,
-                        },
-                    ],
-                });
-                //si la session actuelle possède une entrée, on rajoute un scène à son parcours
-            } else {
-
-
-                paths[i].scenes.push({
-                    enterTime: startW.EventTime,
-                    scene: startW.SceneName,
-                    fromScene: startW.FromSceneName,
-                    whitelisted: true,
-                    duration: e.EventTime - startW.EventTime,
-                    zonesFound: zoneFoundList,
-                    zonesScored: zoneScoreList,
-                });
-            }
-
-            //reset values for next scene
-            startW = e.EventName == "Launch_CloseSession" ? undefined : e;
-
-            zoneFoundList = [];
-            zoneScoreList = [];
-
-            endW = undefined;
+    data = data.filter(e =>
+        e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
+    )
+    console.log(setPathsOld(data, mapScenes)[0])
+    //Separate all sessions by regrouping all data by sessionID
+    let reduced = data.reduce((acc, e) => {
+        if (!acc[e.SessionId]) {
+            acc[e.SessionId] = {}
+            acc[e.SessionId].id = e.SessionId
+            acc[e.SessionId].name = e.LearnerName
+            acc[e.SessionId].actions = []
         }
-    });
-    return paths;
+        acc[e.SessionId].actions.push(e)
+        return acc
+    }, {})
+    reduced = Object.values(reduced)
+    //Iterate through every session and separate scenes
+    reduced.forEach(e => {
+        let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
+            if (val.EventName == "Launch_ChangeWorld") {
+                acc.push(index)
+            }
+            return acc
+        }, [])
+        e.scenes = []
+        for (let i = 0; i < indexesOfChangeWorld.length; i++) {
+
+            let currentSceneActions = e.actions.slice(indexesOfChangeWorld[i], indexesOfChangeWorld[i + 1])
+            let currentScene = {
+                duration: currentSceneActions[currentSceneActions.length - 1].EventTime - currentSceneActions[0].EventTime,
+                enterTime: currentSceneActions[0].EventTime,
+                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneName,
+                scene: currentSceneActions[0].SceneName,
+                zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
+                zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
+                actions: currentSceneActions
+            }
+            e.scenes.push(currentScene)
+        }
+
+    })
+    return reduced;
 }
 
 /**
@@ -496,9 +460,6 @@ const computeData = function (files, merge_themes) {
         {}
     ));
     //format EventTime to Date format
-    output.detail_usage_output.forEach((e) => {
-        e.EventTime = new Date(e.EventTime);
-    });
 
     output.detail_usage_output = files["detail"].sort(
         fieldSorterOptimized(["SessionId", "EventTime"])
@@ -524,6 +485,10 @@ const computeData = function (files, merge_themes) {
             sessionClosed = false;
         }
         return true;
+    });
+
+    output.detail_usage_output.forEach((e) => {
+        e.EventTime = new Date(e.EventTime);
     });
 
     //Get scenes array from csv

@@ -30,6 +30,10 @@ export default {
       default: [],
     },
   },
+  created() {
+    console.log(this.categories);
+    console.log(this.computedPaths);
+  },
   methods: {
     legendSelector(e) {
       this.categories.get(e.id).whitelisted = e.checked;

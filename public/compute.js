@@ -108,8 +108,6 @@ const setPaths = function (data, mapScenes) {
                             enterTime: startW.EventTime,
                             scene: startW.SceneName,
                             fromScene: startW.FromSceneName,
-                            category: mapScenes.get(startW.SceneName).category,
-                            theme: mapScenes.get(startW.SceneName).theme,
                             whitelisted: true,
                             duration: e.EventTime - startW.EventTime,
                             zonesFound: zoneFoundList,
@@ -125,8 +123,6 @@ const setPaths = function (data, mapScenes) {
                     enterTime: startW.EventTime,
                     scene: startW.SceneName,
                     fromScene: startW.FromSceneName,
-                    category: mapScenes.get(startW.SceneName).category,
-                    theme: mapScenes.get(startW.SceneName).theme,
                     whitelisted: true,
                     duration: e.EventTime - startW.EventTime,
                     zonesFound: zoneFoundList,
@@ -159,7 +155,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
         //reduce path to array of scenes
         let path = [];
         let acc = -1;
-
         //iterate on each scene of a path fuse them by category/theme based on option
         p.scenes.forEach((s) => {
             //ensure that the scene is allowed
@@ -175,8 +170,8 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                     }); //only for lisibility in console
                     path.push({
                         id: acc,
-                        category: s.category,
-                        theme: merge_themes ? "---" : s.theme,
+                        category: mapScenes.get(s.scene).category,
+                        theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                         scenes: [
                             {
                                 name: s.scene,
@@ -191,11 +186,13 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 } else {
                     //check if the scne has the same properties (category and theme based on options) of the previous one in the list
                     const obj1 = { category: path[acc].category };
-                    const obj2 = { category: s.category };
+                    const obj2 = { category: mapScenes.get(s.scene).category };
                     if (!merge_themes) {
                         obj1.theme = path[acc].theme;
-                        obj2.theme = s.theme;
+                        obj2.theme = mapScenes.get(s.scene).category;
                     }
+                    // console.log(mapScenes.get(s.scene))
+                    // console.log(obj2)
                     //if different properties, add a new category in the path
                     if (!objectsEqual(obj1, obj2)) {
                         acc++;
@@ -207,8 +204,8 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                         }); //only for lisibility in console
                         path.push({
                             id: acc,
-                            category: s.category,
-                            theme: merge_themes ? "---" : s.theme,
+                            category: mapScenes.get(s.scene).category,
+                            theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                             scenes: [
                                 {
                                     name: s.scene,
@@ -236,7 +233,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 }
             }
         });
-
         // console.log("---new reduced path---");
         // console.log(p.name);
         // console.log(path);
@@ -316,7 +312,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
  * @returns 
  */
 const analyseComputedPaths = function (computedPaths, mapScenes) {
-    // console.log(computedPaths);
 
     computedPaths.forEach((uniquePath) => {
         uniquePath.path.forEach((pathEntry) => {
@@ -472,7 +467,7 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
             });
         });
     });
-
+    console.log(computedPaths[0].path[0])
     return computedPaths;
 }
 
@@ -484,7 +479,6 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
  */
 const computeData = function (files, merge_themes) {
     let output = {}
-    console.log(files)
 
     output.general_usage_output = files.general;
     output.detail_usage_output = files.detail;
@@ -550,7 +544,6 @@ const computeData = function (files, merge_themes) {
     missingScenes.forEach(e => {
         files.categories.arrayScenes.push({ id: e, category: "defaultCategory", theme: "defaultTheme", whitelisted: true })
     })
-    console.log(files.categories.arrayScenes)
     output.scenes = arrayToMap(files.categories.arrayScenes)
     output.themes = arrayToMap(files.categories.arrayThemes);
     output.categories = arrayToMap(files.categories.arrayCategories);

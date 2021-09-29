@@ -8,7 +8,7 @@
       opacity: opacity,
       border: border,
     }"
-    :draggable="this.object ? true : false"
+    :draggable="this.object && this.persistent ? true : false"
     :class="persistent ? 'persistent' : null"
     ><span class="propertyName">{{ object?.id }}</span>
     <input
@@ -17,7 +17,7 @@
       v-if="persistent"
       @change="colorchange"
     />
-    <button v-if="this.object || persistent" @click="deleteProperty">
+    <button v-if="this.object && persistent" @click="deleteProperty">
       Delete
     </button>
   </span>
@@ -58,10 +58,6 @@ export default {
       e.dataTransfer.effectAllowed = this.persistent ? "copy" : "move";
       e.dataTransfer.setData("text", this.object.id);
       e.dataTransfer.setData("type", this.type);
-      if (!this.persistent) {
-        //send data to remove old property from scene on drop
-        e.dataTransfer.setData("origin", this.scene.name);
-      }
       this.opacity = 0.5;
     },
     dragEnd(e) {
@@ -71,11 +67,7 @@ export default {
       this.object.color = e.srcElement.value;
     },
     deleteProperty() {
-      if (this.persistent) {
-        this.$emit("deleteProperty", { type: this.type, name: this.object.id });
-      } else {
-        this.scene[this.type] = null;
-      }
+      this.$emit("deleteProperty", { type: this.type, name: this.object.id });
     },
   },
 };
@@ -84,13 +76,13 @@ export default {
 <style scoped>
 .container {
   border: 2px solid;
-  cursor: grab;
   min-height: calc(1em + 2px);
   display: flex;
   justify-content: flex-end;
   align-content: flex-end;
 }
 .persistent {
+  cursor: grab;
   margin: 5px;
   padding: 5px;
   border-radius: 5px;

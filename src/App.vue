@@ -31,6 +31,7 @@
         :mapScenes="scenes"
         :mapCategories="categories"
         :mapThemes="themes"
+        @sceneUpdate="sceneUpdate"
       />
     </div>
   </div>
@@ -61,7 +62,7 @@ export default {
     return {
       computeWorker: Worker,
       //page to show
-      display: "all",
+      display: "categories",
       //raw general file
       general_usage_output: [],
       //raw detail file
@@ -168,9 +169,17 @@ export default {
       //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
       paths.forEach((p) => {
         p.scenes.forEach((e) => {
-          e.whitelisted = this.categories.get(e.category).whitelisted;
+          e.whitelisted = this.categories.get(
+            this.scenes.get(e.scene).category
+          ).whitelisted;
         });
       });
+    },
+
+    sceneUpdate(scene) {
+      this.scenes.set(scene.id, scene);
+      // console.log(this.scenes);
+      this.updateAndComputePaths();
     },
 
     computeData(files) {

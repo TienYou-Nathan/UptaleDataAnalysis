@@ -65,7 +65,6 @@ const setPaths = function (data, mapScenes) {
     data = data.filter(e =>
         e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
     )
-    console.log(setPathsOld(data, mapScenes)[0])
     //Separate all sessions by regrouping all data by sessionID
     let reduced = data.reduce((acc, e) => {
         if (!acc[e.SessionId]) {
@@ -431,7 +430,6 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
             });
         });
     });
-    console.log(computedPaths[0].path[0])
     return computedPaths;
 }
 

@@ -519,8 +519,8 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
                         if(analysedScenes.find(el=> el.id==d.name).zones.findIndex(el=>z.tag==el.tag)==-1){
                             analysedScenes.find(el=> el.id==d.name).zones.push({
                                 tag : z.tag,
-                                founded : 0,
-                                scored : 0
+                                // founded : 0,
+                                // scored : 0
                             })
                         }
                     })
@@ -549,31 +549,39 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
             })
         })
 
+        console.log("*******")
+        console.log(users);
+        console.log(analysedScenes);
+
+        let tmp = []
+        analysedScenes.forEach(e=>{
+            tmp.push({id : e.id, zones : e.zones.map(e2 => {return {tag:e2.tag, founded:0, scored:0}} )});
+        });
+
+        console.log(tmp)
+
         //extract score data relative to the current path
-        analysedScenes.forEach(d => {
-            
+        tmp.forEach(d => {
             users.forEach(u => {
                 u.scenes.forEach(s => {
                     if(s.name==d.id){
-                        
                         s.zonesFound.forEach(founded => {
                             d.zones.find(el => el.tag==founded.tag).founded++
                         });
-
                         s.zonesScored.forEach(scored => {
                             d.zones.find(el => el.tag==scored.tag).scored++
                         })
-
                     }
                 })
             })
         })
 
-        result.push({id : compPath.id, users: users, data : analysedScenes})
+        result.push({id : compPath.id, users: users, data : tmp})
     })
 
 
     console.log('*******Scores Extracted Per Path**********')
+    console.log(result)
 
     return result;
 }

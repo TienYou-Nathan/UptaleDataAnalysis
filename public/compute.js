@@ -516,15 +516,48 @@ const computeData = function (files, merge_themes) {
 
     return output
 }
-
+/**
+ * 
+ * @param {Array} paths Organized path data
+ * @returns {Array} Array of scenes in which you can find every user and their scores
+ */
+const perUserScores = function (paths) {
+    let results = {};
+    paths.forEach((targetSession) => {
+        //Une session, toutes les scènes avec des réponses à des QCM
+        let QCMScenes = targetSession.scenes.filter(
+            (e) => e.zonesFound.length > 0
+        );
+        QCMScenes.forEach((targetScene) => {
+            //Une scène avec des réponses à des QCM, toutes les réponses
+            let SceneAnswers = {
+                Scene: targetScene.scene,
+                User: targetScene.actions[0].LearnerName,
+                Mail: targetScene.actions[0].LearnerId,
+            };
+            let targetAnswers = targetScene.zonesFound;
+            targetAnswers.forEach((thisAnswer) => {
+                //Une réponse à un QCM
+                SceneAnswers["Question : " + thisAnswer.TagName] = thisAnswer.Answer;
+            });
+            if (!results[SceneAnswers.Scene]) {
+                results[SceneAnswers.Scene] = {};
+            }
+            results[SceneAnswers.Scene][SceneAnswers.User] = SceneAnswers;
+        });
+    });
+    return results
+}
 
 
 onmessage = (e) => {
     let message = {}
     if (e.data.order == "computeData") {
         message = computeData(e.data.files, e.data.merge_themes)
-    } else if (e.data.order = "computePaths") {
+    } else if (e.data.order == "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
+    } else if (e.data.order == "perUserScores") {
+        message.perUserScores = perUserScores(e.data.paths)
     }
     message.order = e.data.order
     postMessage(message)

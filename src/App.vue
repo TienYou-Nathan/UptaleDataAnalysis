@@ -78,6 +78,7 @@ export default {
       //data about each theme
       themes: [],
 
+      perUserScores: [],
       csvData: "",
       isLoading: 0,
       //option for computed paths
@@ -121,8 +122,21 @@ export default {
           this.detail_usage_output = e.data.detail_usage_output;
           this.general_usage_output = e.data.general_usage_output;
           this.computedPaths = e.data.computedPaths;
+          this.getPerUserScores();
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
+        } else if (e.data.order == "perUserScores") {
+          this.perUserScores = e.data.perUserScores;
+          console.log(
+            this.perUserScores.Chambre_des_erreurs_Gestes_a_adopter_v1
+          );
+          console.log(
+            d3.csvFormat(
+              Object.values(
+                this.perUserScores.Chambre_des_erreurs_Gestes_a_adopter_v1
+              )
+            )
+          );
         }
         this.isLoading = 0;
       });
@@ -189,6 +203,17 @@ export default {
         files,
         merge_themes: this.merge_themes,
       });
+    },
+
+    getPerUserScores() {
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "perUserScores",
+            paths: this.paths,
+          })
+        )
+      );
     },
   },
 };

@@ -1,8 +1,7 @@
 <template>
     <div>
-        <PathVisualization/>
+        <PathVisualization :data='data[0].data'/>
     </div>
-  
 </template>
 
 <script>
@@ -19,7 +18,7 @@ export default {
   },
   props: {
     data: Array
-  },
+  }
 };
 </script>
 

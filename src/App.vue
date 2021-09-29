@@ -34,10 +34,8 @@
     </div>
 
     <div v-if="display == 'scorePerPath'">
-      <SceneList
-        :mapScenes="scenes"
-        :mapCategories="categories"
-        :mapThemes="themes"
+      <DataByPath
+        :data="scorePerPathData"
       />
     </div>
   </div>
@@ -47,7 +45,7 @@
 import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
-import DataByPath from "./components/DataViz/DataByPath.vue";
+import DataByPath from "./components/DataViz/DataByPath";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -118,6 +116,7 @@ export default {
     return { sidebarWidth };
   },
   created() {
+
     this.computeWorker = new Worker("/compute.js");
     this.computeWorker.onmessage = (e) => {
       this.isLoading = 2;
@@ -130,15 +129,21 @@ export default {
           this.detail_usage_output = e.data.detail_usage_output;
           this.general_usage_output = e.data.general_usage_output;
           this.computedPaths = e.data.computedPaths;
+          this.scorePerPathData = e.data.scorePerPathData;
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
-        }
+          this.scorePerPathData = e.data.scorePerPathData;
+        } 
         this.isLoading = 0;
       });
     };
   },
+  computed (){
+    
+  },
   methods: {
     updateAndComputePaths(e) {
+
       this.isLoading = 1;
       this.updatePathsWhitelist(this.paths);
       //Ugly hack for proxy object cloning
@@ -171,7 +176,17 @@ export default {
     },
 
     extractScorePerPathData(e) {
-
+      this.isLoading = 1;
+      //Ugly hack for proxy object cloning
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "extractPathData",
+            paths: this.paths,
+            scenes: mapToArray(this.scenes)
+          })
+        )
+      );
     },
 
     sidebarManager(to) {

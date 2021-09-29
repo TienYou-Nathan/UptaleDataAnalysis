@@ -493,7 +493,6 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
         });
     });
 
-    console.log(computedPaths);
     return computedPaths;
 }
 
@@ -558,7 +557,6 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
                     if(s.name==d.id){
                         
                         s.zonesFound.forEach(founded => {
-                            console.log(d.zones)
                             d.zones.find(el => el.tag==founded.tag).founded++
                         });
 
@@ -573,6 +571,10 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
 
         result.push({id : compPath.id, users: users, data : analysedScenes})
     })
+
+
+    console.log('*******Scores Extracted Per Path**********')
+
     return result;
 }
 
@@ -645,12 +647,12 @@ const computeData = function (files, merge_themes) {
 onmessage = (e) => {
     let message = {}
     if (e.data.order == "computeData") {
-        message = computeData(e.data.files, e.data.merge_themes)
+        message = computeData(e.data.files, e.data.merge_themes);
+        message.scorePerPathData = extractScorePerPath(message.computedPaths, message.scenes);
     } else if (e.data.order = "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
-    } else if (e.data.order = "extractPathData"){
-        message.scorePerPathData = extractScorePerPath(e.data.paths, arrayToMap(e.data.scenes))
-    }
+        message.scorePerPathData = extractScorePerPath(message.computedPaths, arrayToMap(e.data.scenes));
+    } 
     message.order = e.data.order
     postMessage(message)
 

@@ -1,5 +1,5 @@
 <template>
-    <div id=container>
+    <div id=VizContainer>
         <svg id=viz>
 
         </svg>
@@ -28,14 +28,16 @@ export default {
         console.log('***Data To visualize***');
         console.log(data)
 
-        const innerwidth=900;
-        const innerheight=540;
+
+        const width = d3.select('#graph').node().getBoundingClientRect().width;
+        const height = d3.select('#graph').node().getBoundingClientRect().height;
+
+        var margin = {top: 50, right: 150, bottom: 160, left: 50};
+
+        const innerwidth=width - margin.left - margin.right;
+        const innerheight=height - margin.top - margin.bottom;
 
         const xpadding=20;
-
-        var margin = {top: 50, right: 150, bottom: 160, left: 50}
-            , width = 900 + margin.left + margin.right  
-            , height = innerheight + margin.top + margin.bottom; 
 
         const global_container = d3.select('#viz')
             .attr('width', `${width}px`)

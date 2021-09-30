@@ -11,6 +11,7 @@
       :mapCategories="categories"
       :mapThemes="themes"
       :csvData="csvData"
+      :perUserScores="perUserScores"
     />
 
     <div v-if="display == 'all'">
@@ -127,15 +128,9 @@ export default {
           this.computedPaths = e.data.computedPaths;
         } else if (e.data.order == "perUserScores") {
           this.perUserScores = e.data.perUserScores;
+          console.log(this.perUserScores["Anamnèse 1"]);
           console.log(
-            this.perUserScores.Chambre_des_erreurs_Gestes_a_adopter_v1
-          );
-          console.log(
-            d3.csvFormat(
-              Object.values(
-                this.perUserScores.Chambre_des_erreurs_Gestes_a_adopter_v1
-              )
-            )
+            d3.csvFormat(Object.values(this.perUserScores["Anamnèse 1"]))
           );
         }
         this.isLoading = 0;

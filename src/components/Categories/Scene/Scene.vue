@@ -76,13 +76,9 @@ export default {
       this.border_color = "transparent";
       this.borders[e.dataTransfer.getData("type")] = null;
       let type = e.dataTransfer.getData("type");
-      let origin = e.dataTransfer.getData("origin");
-      //remove scenePropery from original scene
-      if (origin) {
-        this.mapScenes.get(origin)[type] = "";
-      }
       //set sceneproperty to this scene
       this.scene[type] = e.dataTransfer.getData("text");
+      this.$emit("sceneUpdate", this.scene);
     },
   },
 };

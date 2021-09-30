@@ -50,16 +50,6 @@ const objectsEqual = (o1, o2) => {
     return objectsAreSame;
 };
 
-const objectsEqualByAttribute = (o1, o2, attributes) => {
-    var objectsAreSame = true;
-    attributes.forEach(propertyName => {
-        if (o1[propertyName] !== o2[propertyName]) {
-            objectsAreSame = false;
-        }
-    })
-    return objectsAreSame;
-};
-
 const arraysObjEqual = function (a1, a2) {
     return (a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx])));
 };
@@ -71,90 +61,48 @@ const arraysObjEqual = function (a1, a2) {
  * @returns {Array} Organized Path data
  */
 const setPaths = function (data, mapScenes) {
-    //on ne garde que les données concernant un changement de scène
-    const scene_changes = data.filter((d) => {
-        const actual_scene = mapScenes.get(d.SceneName);
-        return (
-            (d.EventName == "Launch_ChangeWorld" &&
-                actual_scene != undefined &&
-                actual_scene.whitelisted) ||
-            d.EventName == "Launch_QcmAnswerClick" ||
-            d.EventName == "Launch_WinStar" ||
-            d.EventName == "Launch_CloseSession"
-        );
-    });
 
-    let paths = [];
-    let startW = undefined; //event entering the scene
-    let zoneFoundList = []; //list of zones found during the scene
-    let zoneScoreList = []; //list of zone found and question correctly answered
-    let endW = undefined; //event leaving the scene
-    scene_changes.forEach((e) => {
-        if (startW == undefined) {
-            startW = e;
-        } else if (e.EventName == "Launch_WinStar") {
-            zoneScoreList.push({
-                tag: e.TagName,
-                time: e.EventTime,
-            });
-        } else if (e.EventName == "Launch_QcmAnswerClick") {
-            zoneFoundList.push({
-                tag: e.TagName,
-                time: e.EventTime,
-            });
-        } else if (
-            e.EventName == "Launch_ChangeWorld" ||
-            e.EventName == "Launch_CloseSession"
-        ) {
-            endW = e;
-            const i = paths.findIndex((d) => startW.SessionId == d.id);
-            //si la session actuelle n'est pas enregistrée, on crée une nouvelle entrée
-            if (i == -1) {
-
-                paths.push({
-                    id: startW.SessionId,
-                    name: startW.LearnerName,
-                    scenes: [
-                        {
-                            enterTime: startW.EventTime,
-                            scene: startW.SceneName,
-                            fromScene: startW.FromSceneName,
-                            category: mapScenes.get(startW.SceneName).category,
-                            theme: mapScenes.get(startW.SceneName).theme,
-                            whitelisted: true,
-                            duration: e.EventTime - startW.EventTime,
-                            zonesFound: zoneFoundList,
-                            zonesScored: zoneScoreList,
-                        },
-                    ],
-                });
-                //si la session actuelle possède une entrée, on rajoute un scène à son parcours
-            } else {
-
-
-                paths[i].scenes.push({
-                    enterTime: startW.EventTime,
-                    scene: startW.SceneName,
-                    fromScene: startW.FromSceneName,
-                    category: mapScenes.get(startW.SceneName).category,
-                    theme: mapScenes.get(startW.SceneName).theme,
-                    whitelisted: true,
-                    duration: e.EventTime - startW.EventTime,
-                    zonesFound: zoneFoundList,
-                    zonesScored: zoneScoreList,
-                });
-            }
-
-            //reset values for next scene
-            startW = e.EventName == "Launch_CloseSession" ? undefined : e;
-
-            zoneFoundList = [];
-            zoneScoreList = [];
-
-            endW = undefined;
+    data = data.filter(e =>
+        e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
+    )
+    //Separate all sessions by regrouping all data by sessionID
+    let reduced = data.reduce((acc, e) => {
+        if (!acc[e.SessionId]) {
+            acc[e.SessionId] = {}
+            acc[e.SessionId].id = e.SessionId
+            acc[e.SessionId].name = e.LearnerName
+            acc[e.SessionId].actions = []
         }
-    });
-    return paths;
+        acc[e.SessionId].actions.push(e)
+        return acc
+    }, {})
+    reduced = Object.values(reduced)
+    //Iterate through every session and separate scenes
+    reduced.forEach(e => {
+        let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
+            if (val.EventName == "Launch_ChangeWorld") {
+                acc.push(index)
+            }
+            return acc
+        }, [])
+        e.scenes = []
+        for (let i = 0; i < indexesOfChangeWorld.length; i++) {
+
+            let currentSceneActions = e.actions.slice(indexesOfChangeWorld[i], indexesOfChangeWorld[i + 1])
+            let currentScene = {
+                duration: currentSceneActions[currentSceneActions.length - 1].EventTime - currentSceneActions[0].EventTime,
+                enterTime: currentSceneActions[0].EventTime,
+                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneName,
+                scene: currentSceneActions[0].SceneName,
+                zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
+                zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
+                actions: currentSceneActions
+            }
+            e.scenes.push(currentScene)
+        }
+
+    })
+    return reduced;
 }
 
 /**
@@ -170,7 +118,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
         //reduce path to array of scenes
         let path = [];
         let acc = -1;
-
         //iterate on each scene of a path fuse them by category/theme based on option
         p.scenes.forEach((s) => {
             //ensure that the scene is allowed
@@ -186,8 +133,8 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                     }); //only for lisibility in console
                     path.push({
                         id: acc,
-                        category: s.category,
-                        theme: merge_themes ? "---" : s.theme,
+                        category: mapScenes.get(s.scene).category,
+                        theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                         scenes: [
                             {
                                 username: p.name,
@@ -203,11 +150,13 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 } else {
                     //check if the scne has the same properties (category and theme based on options) of the previous one in the list
                     const obj1 = { category: path[acc].category };
-                    const obj2 = { category: s.category };
+                    const obj2 = { category: mapScenes.get(s.scene).category };
                     if (!merge_themes) {
                         obj1.theme = path[acc].theme;
-                        obj2.theme = s.theme;
+                        obj2.theme = mapScenes.get(s.scene).category;
                     }
+                    // console.log(mapScenes.get(s.scene))
+                    // console.log(obj2)
                     //if different properties, add a new category in the path
                     if (!objectsEqual(obj1, obj2)) {
                         acc++;
@@ -219,8 +168,8 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                         }); //only for lisibility in console
                         path.push({
                             id: acc,
-                            category: s.category,
-                            theme: merge_themes ? "---" : s.theme,
+                            category: mapScenes.get(s.scene).category,
+                            theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                             scenes: [
                                 {
                                     username: p.name,
@@ -250,7 +199,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 }
             }
         });
-
         // console.log("---new reduced path---");
         // console.log(p.name);
         // console.log(path);
@@ -336,7 +284,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
  * @returns 
  */
 const analyseComputedPaths = function (computedPaths, mapScenes) {
-    // console.log(computedPaths);
 
     computedPaths.forEach((uniquePath) => {
         uniquePath.path.forEach((pathEntry) => {
@@ -492,7 +439,6 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
             });
         });
     });
-
     return computedPaths;
 }
 
@@ -595,7 +541,6 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
 const computeData = function (files, merge_themes) {
     let output = {}
 
-    let mapScenes = arrayToMap(files.categories.arrayScenes)
     output.general_usage_output = files.general;
     output.detail_usage_output = files.detail;
     output.categories = arrayToMap(files.categories.arrayCategories);
@@ -612,9 +557,6 @@ const computeData = function (files, merge_themes) {
         {}
     ));
     //format EventTime to Date format
-    output.detail_usage_output.forEach((e) => {
-        e.EventTime = new Date(e.EventTime);
-    });
 
     output.detail_usage_output = files["detail"].sort(
         fieldSorterOptimized(["SessionId", "EventTime"])
@@ -642,12 +584,79 @@ const computeData = function (files, merge_themes) {
         return true;
     });
 
+    output.detail_usage_output.forEach((e) => {
+        e.EventTime = new Date(e.EventTime);
+    });
 
-    output.paths = setPaths(output.detail_usage_output, mapScenes);
-    output.computedPaths = computePaths(output.paths, mapScenes, merge_themes);
+    //Get scenes array from csv
+    let availableScenes = Object.keys(output.detail_usage_output.reduce((acc, e) => {
+        if (e.SceneId) {
+            acc[e.SceneId] = true
+        }
+        return acc
+    }, {}))
+
+    //Get scenes array from JSON
+    let registeredScenes = files.categories.arrayScenes.reduce((acc, e) => {
+        acc.push(e.id)
+        return acc
+    }, [])
+    //get available but not registered scenes
+    let missingScenes = availableScenes.filter(x => !registeredScenes.includes(x))
+    missingScenes.forEach(e => {
+        files.categories.arrayScenes.push({ id: e, category: "defaultCategory", theme: "defaultTheme", whitelisted: true })
+    })
+    output.scenes = arrayToMap(files.categories.arrayScenes)
+    output.themes = arrayToMap(files.categories.arrayThemes);
+    output.categories = arrayToMap(files.categories.arrayCategories);
+
+    output.paths = setPaths(output.detail_usage_output, output.scenes);
+    output.computedPaths = computePaths(output.paths, output.scenes, merge_themes);
+
     return output
 }
-
+/**
+ * 
+ * @param {Array} paths Organized path data
+ * @returns {Array} Array of scenes in which you can find every user and their scores
+ */
+const perUserScores = function (paths) {
+    let results = {};
+    paths.forEach((targetSession) => {
+        //Une session, toutes les scènes avec des réponses à des QCM
+        let QCMScenes = targetSession.scenes.filter(
+            (e) => e.zonesFound.length > 0
+        );
+        QCMScenes.forEach((targetScene) => {
+            //Une scène avec des réponses à des QCM, toutes les réponses
+            let SceneAnswers = {
+                Scene: targetScene.scene,
+                User: targetScene.actions[0].LearnerName,
+                Mail: targetScene.actions[0].LearnerId,
+            };
+            let targetAnswers = targetScene.zonesFound;
+            targetAnswers.forEach((thisAnswer) => {
+                //Une réponse à un QCM
+                SceneAnswers["Question : " + thisAnswer.TagName] = thisAnswer.Answer;
+            });
+            if (!results[SceneAnswers.Scene]) {
+                results[SceneAnswers.Scene] = {};
+            }
+            results[SceneAnswers.Scene][SceneAnswers.User] = SceneAnswers;
+        });
+    });
+    results.allScenesCombined = Object.values(results).reduce((acc, scene) => {
+        Object.values(scene).forEach(user => {
+            if (!acc[user.User]) {
+                acc[user.User] = {}
+            }
+            delete user.Scene
+            acc[user.User] = { ...acc[user.User], ...user }
+        })
+        return acc
+    }, {})
+    return results
+}
 
 
 
@@ -660,7 +669,9 @@ onmessage = (e) => {
     } else if (e.data.order = "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
         message.scorePerPathData = extractScorePerPath(message.computedPaths, arrayToMap(e.data.scenes));
-    } 
+    } else if (e.data.order == "perUserScores") {
+        message.perUserScores = perUserScores(e.data.paths)
+    }
     message.order = e.data.order
     postMessage(message)
 

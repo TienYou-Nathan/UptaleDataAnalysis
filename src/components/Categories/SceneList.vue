@@ -14,6 +14,7 @@
       :mapCategories="mapCategories"
       :mapThemes="mapThemes"
       :mapScenes="mapScenes"
+      @sceneUpdate="$emit('sceneUpdate', $event)"
     />
     <div id="categoryList">
       <div class="sticky">

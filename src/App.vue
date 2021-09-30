@@ -10,6 +10,8 @@
       :mapScenes="scenes"
       :mapCategories="categories"
       :mapThemes="themes"
+      :csvData="csvData"
+      :perUserScores="perUserScores"
     />
 
     <div v-if="display == 'all'">
@@ -30,6 +32,7 @@
         :mapScenes="scenes"
         :mapCategories="categories"
         :mapThemes="themes"
+        @sceneUpdate="sceneUpdate"
       />
     </div>
 
@@ -68,7 +71,7 @@ export default {
     return {
       computeWorker: Worker,
       //page to show
-      display: "all",
+      display: "categories",
       //raw general file
       general_usage_output: [],
       //raw detail file
@@ -86,6 +89,8 @@ export default {
       //data about each theme
       themes: [],
 
+      perUserScores: [],
+      csvData: "",
       isLoading: 0,
       //option for computed paths
       merge_themes: false,
@@ -130,10 +135,17 @@ export default {
           this.general_usage_output = e.data.general_usage_output;
           this.computedPaths = e.data.computedPaths;
           this.scorePerPathData = e.data.scorePerPathData;
+          this.getPerUserScores();
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
           this.scorePerPathData = e.data.scorePerPathData;
-        } 
+        } else if (e.data.order == "perUserScores") {
+          this.perUserScores = e.data.perUserScores;
+          // console.log(this.perUserScores.allScenesCombined);
+          // console.log(
+          //   d3.csvFormat(Object.values(this.perUserScores.allScenesCombined))
+          // );
+        }
         this.isLoading = 0;
       });
     };
@@ -197,9 +209,17 @@ export default {
       //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
       paths.forEach((p) => {
         p.scenes.forEach((e) => {
-          e.whitelisted = this.categories.get(e.category).whitelisted;
+          e.whitelisted = this.categories.get(
+            this.scenes.get(e.scene).category
+          ).whitelisted;
         });
       });
+    },
+
+    sceneUpdate(scene) {
+      this.scenes.set(scene.id, scene);
+      // console.log(this.scenes);
+      this.updateAndComputePaths();
     },
 
     computeData(files) {
@@ -209,6 +229,17 @@ export default {
         files,
         merge_themes: this.merge_themes,
       });
+    },
+
+    getPerUserScores() {
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "perUserScores",
+            paths: this.paths,
+          })
+        )
+      );
     },
   },
 };

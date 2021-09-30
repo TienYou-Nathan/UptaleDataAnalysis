@@ -12,7 +12,11 @@
     <span @click="currentWindow = 'upload'">
       <i class="fas fa-upload icon"></i>
     </span>
-    <a
+    <span @click="currentWindow = 'download'">
+      <i class="fas fa-download icon"></i>
+    </span>
+    <!-- <a
+      class="icon"
       id="download"
       :href="
         'data:text/json;charset=utf-8,' +
@@ -26,38 +30,37 @@
       "
     >
       <i class="fas fa-download icon" @click="download"></i
-    ></a>
+    ></a> -->
+    <!-- <a
+      class="icon"
+      id="downloadCSV"
+      :href="'data:text/csv;charset=utf-8,' + csvData"
+      ><i class="fas fa-file-csv"></i
+    ></a> -->
   </div>
-  <div id="uploadPrompt" v-if="currentWindow == 'upload'">
-    <div id="background" @click="currentWindow = null" />
-    <div id="content">
-      <div :key="field.name" v-for="field in fields" @click="uploadFile">
-        <label :for="field.name">{{ field.label }}</label>
-        <input
-          type="file"
-          :id="field.name"
-          :name="field.name"
-          :accept="'.' + field.format"
-          @change="fileChange"
-        />
-        <i>{{
-          field.file
-            ? field.file.name +
-              "" +
-              " " +
-              ((field.file?.size / 1000000).toFixed(2) + "MB")
-            : ""
-        }}</i>
-      </div>
-    </div>
-  </div>
+  <Prompt
+    v-if="currentWindow == 'upload'"
+    :data="fields"
+    @fileChange="fileChange"
+    @currentWindowChange="currentWindow = $event"
+    :type="'largePanels'"
+  />
+  <Prompt
+    v-if="currentWindow == 'download'"
+    :data="perUserScores"
+    @currentWindowChange="currentWindow = $event"
+    :type="'propList'"
+  />
 </template>
 
 <script>
 import { mapToArray } from "../../utilities";
 
+import Prompt from "./Prompt.vue";
+
 export default {
   name: "FileLoader",
+  components: { Prompt },
   data() {
     return {
       currentWindow: "",
@@ -76,7 +79,9 @@ export default {
       type: Map,
       default: [],
     },
+    csvData: String,
     isLoading: Number,
+    perUserScores: Object,
     fields: {
       type: Array,
       default: [
@@ -131,12 +136,7 @@ export default {
       });
       this.$emit("filesLoaded", result);
     },
-    uploadFile(e) {
-      //We want to avoid triggering twice the same event
-      if (e.target.tagName == "DIV") {
-        e.target.querySelector("input").click();
-      }
-    },
+
     fileChange(e) {
       this.fields.find((field) => field.name == e.target.id).file =
         e.target.files[0];
@@ -159,58 +159,5 @@ export default {
   min-width: 0;
   margin: 10px;
   cursor: pointer;
-}
-
-#uploadPrompt {
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-#background {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-#content {
-  border-radius: 10px;
-  position: absolute;
-  display: flex;
-  flex-direction: row;
-  top: 20%;
-  bottom: 20%;
-  left: 20%;
-  right: 20%;
-  background: white;
-}
-#content > * {
-  user-select: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 5px;
-  border: 1px dashed black;
-  border-radius: 10px;
-  flex-basis: 0;
-  flex-grow: 1;
-  min-width: 0;
-}
-#content > *:hover {
-  background: lightgray;
-}
-#content * {
-  cursor: pointer;
-}
-#content * input {
-  display: none;
-}
-input {
-  display: none;
 }
 </style>

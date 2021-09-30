@@ -137,8 +137,8 @@ export default {
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
           this.scorePerPathData = e.data.scorePerPathData;
-        } else if (e.data.order == "perUserScores") {
-          this.perUserScores = e.data.perUserScores;
+        } else if (e.data.order == "perUserAnswers") {
+          this.perUserAnswers = e.data.perUserAnswers;
         }
         this.isLoading = 0;
       });

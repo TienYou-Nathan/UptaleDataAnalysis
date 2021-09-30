@@ -47,6 +47,7 @@
   />
   <Prompt
     v-if="currentWindow == 'download'"
+    :data="perUserScores"
     @currentWindowChange="currentWindow = $event"
     :type="'propList'"
   />

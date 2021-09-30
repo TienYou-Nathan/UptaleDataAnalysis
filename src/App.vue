@@ -128,10 +128,10 @@ export default {
           this.computedPaths = e.data.computedPaths;
         } else if (e.data.order == "perUserScores") {
           this.perUserScores = e.data.perUserScores;
-          console.log(this.perUserScores["Anamnèse 1"]);
-          console.log(
-            d3.csvFormat(Object.values(this.perUserScores["Anamnèse 1"]))
-          );
+          // console.log(this.perUserScores.allScenesCombined);
+          // console.log(
+          //   d3.csvFormat(Object.values(this.perUserScores.allScenesCombined))
+          // );
         }
         this.isLoading = 0;
       });

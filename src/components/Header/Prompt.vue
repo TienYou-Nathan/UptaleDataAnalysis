@@ -21,13 +21,29 @@
         }}</i>
       </div>
     </div>
-    <div id="content" v-if="type == 'propList'">
-      <div :key="field.name" v-for="field in data" @click="downloadFile"></div>
+    <div id="list" v-if="type == 'propList'">
+      <div
+        :key="scene.Scene"
+        v-for="(scene, index) in data"
+        @click="downloadFile"
+      >
+        <a
+          :href="
+            'data:text/csv;charset=utf-8,' +
+            encodeURIComponent(csvFormat(scene))
+          "
+          >{{ index }}</a
+        >
+        {{ `${Object.keys(scene).length} Utilisateurs` }}
+        <!-- <span v-for="user in scene" :key="user.User">{{ user.User }}</span> -->
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import * as d3 from "d3";
+
 export default {
   name: "Prompt",
   emits: ["fileChange", "currentWindowChange"],
@@ -39,12 +55,16 @@ export default {
     data: Object,
     type: String,
   },
+  created() {},
   methods: {
     uploadFile(e) {
       //We want to avoid triggering twice the same event
       if (e.target.tagName == "DIV") {
         e.target.querySelector("input").click();
       }
+    },
+    csvFormat(data) {
+      return d3.csvFormat(Object.values(data));
     },
   },
 };
@@ -67,6 +87,17 @@ export default {
   right: 0;
   background: rgba(0, 0, 0, 0.5);
 }
+#list {
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  left: 20%;
+  right: 20%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
 #content {
   border-radius: 10px;
   position: absolute;
@@ -82,7 +113,6 @@ export default {
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   margin: 5px;
   border: 1px dashed black;
@@ -90,6 +120,7 @@ export default {
   flex-basis: 0;
   flex-grow: 1;
   min-width: 0;
+  overflow-y: auto;
 }
 #content > *:hover {
   background: lightgray;

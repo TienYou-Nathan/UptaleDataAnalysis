@@ -546,6 +546,16 @@ const perUserScores = function (paths) {
             results[SceneAnswers.Scene][SceneAnswers.User] = SceneAnswers;
         });
     });
+    results.allScenesCombined = Object.values(results).reduce((acc, scene) => {
+        Object.values(scene).forEach(user => {
+            if (!acc[user.User]) {
+                acc[user.User] = {}
+            }
+            delete user.Scene
+            acc[user.User] = { ...acc[user.User], ...user }
+        })
+        return acc
+    }, {})
     return results
 }
 

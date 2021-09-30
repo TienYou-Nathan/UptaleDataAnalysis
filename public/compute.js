@@ -60,7 +60,7 @@ const arraysObjEqual = function (a1, a2) {
  * @param {Boolean} mapScenes 
  * @returns {Array} Organized Path data
  */
-const setPaths = function (data, mapScenes) {
+const setPaths = function (data) {
 
     data = data.filter(e =>
         e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
@@ -92,8 +92,8 @@ const setPaths = function (data, mapScenes) {
             let currentScene = {
                 duration: currentSceneActions[currentSceneActions.length - 1].EventTime - currentSceneActions[0].EventTime,
                 enterTime: currentSceneActions[0].EventTime,
-                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneName,
-                scene: currentSceneActions[0].SceneName,
+                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneId,
+                scene: currentSceneActions[0].SceneId,
                 zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
                 zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
                 actions: currentSceneActions
@@ -155,8 +155,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                         obj1.theme = path[acc].theme;
                         obj2.theme = mapScenes.get(s.scene).category;
                     }
-                    // console.log(mapScenes.get(s.scene))
-                    // console.log(obj2)
                     //if different properties, add a new category in the path
                     if (!objectsEqual(obj1, obj2)) {
                         acc++;
@@ -199,9 +197,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 }
             }
         });
-        // console.log("---new reduced path---");
-        // console.log(p.name);
-        // console.log(path);
 
         //now that the path es reduced, check if a similar computed path exists, excluding scene's personnal properties
         const i = computedPaths.findIndex((d) => {
@@ -495,16 +490,10 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
             })
         })
 
-        console.log("*******")
-        console.log(users);
-        console.log(analysedScenes);
-
         let tmp = []
         analysedScenes.forEach(e=>{
             tmp.push({id : e.id, zones : e.zones.map(e2 => {return {tag:e2.tag, founded:0, scored:0}} )});
         });
-
-        console.log(tmp)
 
         //extract score data relative to the current path
         tmp.forEach(d => {
@@ -666,7 +655,7 @@ onmessage = (e) => {
     if (e.data.order == "computeData") {
         message = computeData(e.data.files, e.data.merge_themes);
         message.scorePerPathData = extractScorePerPath(message.computedPaths, message.scenes);
-    } else if (e.data.order = "computePaths") {
+    } else if (e.data.order == "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
         message.scorePerPathData = extractScorePerPath(message.computedPaths, arrayToMap(e.data.scenes));
     } else if (e.data.order == "perUserScores") {

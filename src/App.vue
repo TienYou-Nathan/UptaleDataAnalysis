@@ -141,10 +141,6 @@ export default {
           this.scorePerPathData = e.data.scorePerPathData;
         } else if (e.data.order == "perUserScores") {
           this.perUserScores = e.data.perUserScores;
-          // console.log(this.perUserScores.allScenesCombined);
-          // console.log(
-          //   d3.csvFormat(Object.values(this.perUserScores.allScenesCombined))
-          // );
         }
         this.isLoading = 0;
       });
@@ -154,8 +150,7 @@ export default {
     
   },
   methods: {
-    updateAndComputePaths(e) {
-
+    updateAndComputePaths() {
       this.isLoading = 1;
       this.updatePathsWhitelist(this.paths);
       //Ugly hack for proxy object cloning
@@ -218,7 +213,6 @@ export default {
 
     sceneUpdate(scene) {
       this.scenes.set(scene.id, scene);
-      // console.log(this.scenes);
       this.updateAndComputePaths();
     },
 

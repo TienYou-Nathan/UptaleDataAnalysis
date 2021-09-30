@@ -32,12 +32,15 @@ export default {
         const width = d3.select('#graph').node().getBoundingClientRect().width;
         const height = d3.select('#graph').node().getBoundingClientRect().height;
 
+        // const width = 0;
+        // const height = 0;
+
         var margin = {top: 50, right: 150, bottom: 160, left: 50};
 
         const innerwidth=width - margin.left - margin.right;
         const innerheight=height - margin.top - margin.bottom;
 
-        const xpadding=20;
+        const xpadding=0;
 
         const global_container = d3.select('#viz')
             .attr('width', `${width}px`)

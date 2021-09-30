@@ -9,7 +9,7 @@
       :mapCategories="mapCategories"
       :mapThemes="mapThemes"
       :csvData="csvData"
-      :perUserScores="perUserScores"
+      :perUserAnswers="perUserAnswers"
     />
   </header>
 </template>
@@ -41,7 +41,7 @@ export default {
       type: String,
       default: "[Insert Title here]",
     },
-    perUserScores: Object,
+    perUserAnswers: Object,
     csvData: String,
     isLoading: Number,
     fields: {},

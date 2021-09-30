@@ -521,7 +521,7 @@ const computeData = function (files, merge_themes) {
  * @param {Array} paths Organized path data
  * @returns {Array} Array of scenes in which you can find every user and their scores
  */
-const perUserScores = function (paths) {
+const perUserAnswers = function (paths) {
     let results = {};
     paths.forEach((targetSession) => {
         //Une session, toutes les scènes avec des réponses à des QCM
@@ -566,8 +566,8 @@ onmessage = (e) => {
         message = computeData(e.data.files, e.data.merge_themes)
     } else if (e.data.order == "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
-    } else if (e.data.order == "perUserScores") {
-        message.perUserScores = perUserScores(e.data.paths)
+    } else if (e.data.order == "perUserAnswers") {
+        message.perUserAnswers = perUserAnswers(e.data.paths)
     }
     message.order = e.data.order
     postMessage(message)

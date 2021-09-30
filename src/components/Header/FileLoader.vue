@@ -47,7 +47,7 @@
   />
   <Prompt
     v-if="currentWindow == 'download'"
-    :data="perUserScores"
+    :data="perUserAnswers"
     @currentWindowChange="currentWindow = $event"
     :type="'propList'"
   />
@@ -81,7 +81,7 @@ export default {
     },
     csvData: String,
     isLoading: Number,
-    perUserScores: Object,
+    perUserAnswers: Object,
     fields: {
       type: Array,
       default: [

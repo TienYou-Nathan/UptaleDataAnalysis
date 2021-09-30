@@ -11,7 +11,7 @@
       :mapCategories="categories"
       :mapThemes="themes"
       :csvData="csvData"
-      :perUserScores="perUserScores"
+      :perUserAnswers="perUserAnswers"
     />
 
     <div v-if="display == 'all'">
@@ -79,7 +79,7 @@ export default {
       //data about each theme
       themes: [],
 
-      perUserScores: [],
+      perUserAnswers: [],
       csvData: "",
       isLoading: 0,
       //option for computed paths
@@ -126,12 +126,8 @@ export default {
           this.getPerUserScores();
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
-        } else if (e.data.order == "perUserScores") {
-          this.perUserScores = e.data.perUserScores;
-          // console.log(this.perUserScores.allScenesCombined);
-          // console.log(
-          //   d3.csvFormat(Object.values(this.perUserScores.allScenesCombined))
-          // );
+        } else if (e.data.order == "perUserAnswers") {
+          this.perUserAnswers = e.data.perUserAnswers;
         }
         this.isLoading = 0;
       });
@@ -204,7 +200,7 @@ export default {
       this.computeWorker.postMessage(
         JSON.parse(
           JSON.stringify({
-            order: "perUserScores",
+            order: "perUserAnswers",
             paths: this.paths,
           })
         )

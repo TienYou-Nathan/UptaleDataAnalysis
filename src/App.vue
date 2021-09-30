@@ -3,6 +3,7 @@
 
   <div id="nav" :style="{ 'margin-left': sidebarWidth }">
     <Header
+      id="Header"
       title="VR@COVID Paths Analysis"
       :fields="fields"
       @filesLoaded="computeData"
@@ -35,6 +36,10 @@
         @sceneUpdate="sceneUpdate"
       />
     </div>
+
+    <div id="container" v-if="display == 'scorePerPath'">
+      <DataByPath :data="scorePerPathData" />
+    </div>
   </div>
 </template>
 
@@ -42,6 +47,7 @@
 import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
+import DataByPath from "./components/DataViz/DataByPath";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -58,6 +64,7 @@ export default {
     AllRoutes,
     Sidebar,
     SceneList,
+    DataByPath,
   },
   data() {
     return {
@@ -72,6 +79,8 @@ export default {
       paths: [],
       //list of reduced and merged paths
       computedPaths: [],
+      scorePerPathData: [],
+
       //data about each scene
       scenes: [],
       //data about each categories
@@ -123,18 +132,21 @@ export default {
           this.detail_usage_output = e.data.detail_usage_output;
           this.general_usage_output = e.data.general_usage_output;
           this.computedPaths = e.data.computedPaths;
+          this.scorePerPathData = e.data.scorePerPathData;
           this.getPerUserScores();
         } else if (e.data.order == "computePaths") {
           this.computedPaths = e.data.computedPaths;
-        } else if (e.data.order == "perUserAnswers") {
-          this.perUserAnswers = e.data.perUserAnswers;
+          this.scorePerPathData = e.data.scorePerPathData;
+        } else if (e.data.order == "perUserScores") {
+          this.perUserScores = e.data.perUserScores;
         }
         this.isLoading = 0;
       });
     };
   },
+  computed() {},
   methods: {
-    updateAndComputePaths(e) {
+    updateAndComputePaths() {
       this.isLoading = 1;
       this.updatePathsWhitelist(this.paths);
       //Ugly hack for proxy object cloning
@@ -166,6 +178,20 @@ export default {
       );
     },
 
+    extractScorePerPathData(e) {
+      this.isLoading = 1;
+      //Ugly hack for proxy object cloning
+      this.computeWorker.postMessage(
+        JSON.parse(
+          JSON.stringify({
+            order: "extractPathData",
+            paths: this.paths,
+            scenes: mapToArray(this.scenes),
+          })
+        )
+      );
+    },
+
     sidebarManager(to) {
       this.display = to;
     },
@@ -183,7 +209,6 @@ export default {
 
     sceneUpdate(scene) {
       this.scenes.set(scene.id, scene);
-      // console.log(this.scenes);
       this.updateAndComputePaths();
     },
 
@@ -211,7 +236,16 @@ export default {
 </script>
 
 <style>
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0;
+}
+
 #app {
+  height: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -220,5 +254,20 @@ export default {
 }
 #nav {
   transition: 0.3s ease;
+  height: 100%;
+
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  grid-template-columns: 100%;
+}
+#Header {
+  padding: 1vmin;
+  grid-column: 1;
+  grid-row: 1;
+}
+#container {
+  padding: 1vmin;
+  grid-column: 1;
+  grid-row: 2;
 }
 </style>

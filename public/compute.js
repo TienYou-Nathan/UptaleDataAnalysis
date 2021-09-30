@@ -60,7 +60,7 @@ const arraysObjEqual = function (a1, a2) {
  * @param {Boolean} mapScenes 
  * @returns {Array} Organized Path data
  */
-const setPaths = function (data, mapScenes) {
+const setPaths = function (data) {
 
     data = data.filter(e =>
         e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
@@ -92,8 +92,8 @@ const setPaths = function (data, mapScenes) {
             let currentScene = {
                 duration: currentSceneActions[currentSceneActions.length - 1].EventTime - currentSceneActions[0].EventTime,
                 enterTime: currentSceneActions[0].EventTime,
-                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneName,
-                scene: currentSceneActions[0].SceneName,
+                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneId,
+                scene: currentSceneActions[0].SceneId,
                 zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
                 zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
                 actions: currentSceneActions
@@ -137,6 +137,7 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                         theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                         scenes: [
                             {
+                                username: p.name,
                                 name: s.scene,
                                 duration: s.duration,
                                 zonesFound: found,
@@ -154,8 +155,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                         obj1.theme = path[acc].theme;
                         obj2.theme = mapScenes.get(s.scene).category;
                     }
-                    // console.log(mapScenes.get(s.scene))
-                    // console.log(obj2)
                     //if different properties, add a new category in the path
                     if (!objectsEqual(obj1, obj2)) {
                         acc++;
@@ -171,6 +170,7 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                             theme: merge_themes ? "---" : mapScenes.get(s.scene).theme,
                             scenes: [
                                 {
+                                    username: p.name,
                                     name: s.scene,
                                     duration: s.duration,
                                     zonesFound: found,
@@ -187,6 +187,7 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                             return { tag: e.tag, time: e.time };
                         }); //only for lisibility in console
                         path[acc].scenes.push({
+                            username: p.name,
                             name: s.scene,
                             duration: s.duration,
                             zonesFound: found,
@@ -196,9 +197,6 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 }
             }
         });
-        // console.log("---new reduced path---");
-        // console.log(p.name);
-        // console.log(path);
 
         //now that the path es reduced, check if a similar computed path exists, excluding scene's personnal properties
         const i = computedPaths.findIndex((d) => {
@@ -252,20 +250,26 @@ const computePaths = function (paths, mapScenes, merge_themes) {
                 p.scenes.push(path[ind].scenes)
             );
         }
+
+
     });
 
+    //find the proportion of usage of each path
     computedPaths.forEach((p) => {
         p.proportion =
             (p.entries / computedPaths.reduce((a, b) => +a + +b.entries, 0)) *
             100;
     });
-
+    //sort paths by proportion
     computedPaths = computedPaths.sort((a, b) =>
         a.proportion < b.proportion ? 1 : b.proportion < a.proportion ? -1 : 0
     );
-    // console.log("Computed Path");
-    // console.log(computedPaths);
-    return analyseComputedPaths(computedPaths, mapScenes);;
+
+
+    console.log("Computed Path");
+    console.log(computedPaths);
+
+    return analyseComputedPaths(computedPaths, mapScenes);
 }
 
 /**
@@ -434,6 +438,90 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
 }
 
 /**
+ * @param {Array} computedPaths
+ * @param {Map} mapScenes
+ * @returns {Array} result 
+ */
+const extractScorePerPath = (computedPaths, mapScenes) => {
+
+    const targetCategory = 'chambre_entrainement';
+    let result = [];
+    let analysedScenes = [];
+
+    //contract all tag per scene in a scructure
+    mapScenes.forEach((value, key) => {
+        if (value.category == targetCategory) analysedScenes.push({ id: key, zones: [] })
+    });
+    computedPaths.forEach(compPath => {
+        compPath.path.filter(p => p.category == targetCategory).forEach(p => {
+            p.scenes.forEach(s => {
+                s.forEach(d => {
+                    d.zonesFound.forEach(z => {
+                        if (analysedScenes.find(el => el.id == d.name).zones.findIndex(el => z.tag == el.tag) == -1) {
+                            analysedScenes.find(el => el.id == d.name).zones.push({
+                                tag: z.tag,
+                                // founded : 0,
+                                // scored : 0
+                            })
+                        }
+                    })
+                });
+            })
+        })
+    })
+
+    computedPaths.forEach(compPath => {
+        //extract score details per user
+        let users = [];
+        compPath.path.filter(p => p.category == targetCategory).forEach(p => {
+            p.scenes.forEach(s => {
+                let actualUser = { name: s[0].username, scenes: [] };
+
+                s.forEach(d => {
+
+                    actualUser.scenes.push({
+                        name: d.name,
+                        zonesFound: d.zonesFound,
+                        zonesScored: d.zonesScored
+                    });
+                });
+
+                users.push(actualUser);
+            })
+        })
+
+        let tmp = []
+        analysedScenes.forEach(e => {
+            tmp.push({ id: e.id, zones: e.zones.map(e2 => { return { tag: e2.tag, founded: 0, scored: 0 } }) });
+        });
+
+        //extract score data relative to the current path
+        tmp.forEach(d => {
+            users.forEach(u => {
+                u.scenes.forEach(s => {
+                    if (s.name == d.id) {
+                        s.zonesFound.forEach(founded => {
+                            d.zones.find(el => el.tag == founded.tag).founded++
+                        });
+                        s.zonesScored.forEach(scored => {
+                            d.zones.find(el => el.tag == scored.tag).scored++
+                        })
+                    }
+                })
+            })
+        })
+
+        result.push({ id: compPath.id, users: users, data: tmp })
+    })
+
+
+    console.log('*******Scores Extracted Per Path**********')
+    console.log(result)
+
+    return result;
+}
+
+/**
  * 
  * @param {Object} files 
  * @param {Boolean} merge_themes 
@@ -560,12 +648,16 @@ const perUserAnswers = function (paths) {
 }
 
 
+
+
 onmessage = (e) => {
     let message = {}
     if (e.data.order == "computeData") {
-        message = computeData(e.data.files, e.data.merge_themes)
+        message = computeData(e.data.files, e.data.merge_themes);
+        message.scorePerPathData = extractScorePerPath(message.computedPaths, message.scenes);
     } else if (e.data.order == "computePaths") {
         message.computedPaths = computePaths(e.data.paths, arrayToMap(e.data.scenes), e.data.merge_themes)
+        message.scorePerPathData = extractScorePerPath(message.computedPaths, arrayToMap(e.data.scenes));
     } else if (e.data.order == "perUserAnswers") {
         message.perUserAnswers = perUserAnswers(e.data.paths)
     }

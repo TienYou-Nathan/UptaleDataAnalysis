@@ -71,7 +71,7 @@ export const wait = function (milliseconds) {
 export const proxyToStructure = data => {
     return JSON.parse(
         JSON.stringify({
-          data
+            data
         })
-      )
+    )
 }

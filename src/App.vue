@@ -56,6 +56,8 @@ import Header from "./components/Header/Header.vue";
 
 import { wait, mapToArray } from "./utilities";
 
+import { workerManager } from "./workerManager";
+
 export default {
   name: "App",
   components: {
@@ -68,6 +70,8 @@ export default {
   },
   data() {
     return {
+      sqlWorker: workerManager,
+      databaseInsertion: workerManager,
       computeWorker: Worker,
       //page to show
       display: "categories",
@@ -120,6 +124,7 @@ export default {
     return { sidebarWidth };
   },
   created() {
+    return;
     this.computeWorker = new Worker("/compute.js");
     this.computeWorker.onmessage = (e) => {
       this.isLoading = 2;
@@ -212,13 +217,17 @@ export default {
       this.updateAndComputePaths();
     },
 
-    computeData(files) {
+    async computeData(files) {
       this.isLoading = 1;
-      this.computeWorker.postMessage({
-        order: "computeData",
+      this.sqlWorker = workerManager(new Worker("/databaseInsertion.js"));
+      let result = await this.sqlWorker.send({
+        id: this.sqlWorker.id++,
+        action: "extractCSVData",
         files,
-        merge_themes: this.merge_themes,
       });
+      this.isLoading = 2;
+      this.isLoading = 0;
+      //console.log(result);
     },
 
     getPerUserScores() {

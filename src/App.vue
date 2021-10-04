@@ -219,15 +219,19 @@ export default {
 
     async computeData(files) {
       this.isLoading = 1;
-      this.sqlWorker = workerManager(new Worker("/databaseInsertion.js"));
-      let result = await this.sqlWorker.send({
+      this.sqlWorker = workerManager(
+        new Worker("/scripts/workers/database.js")
+      );
+      await this.sqlWorker.send({
         id: this.sqlWorker.id++,
         action: "extractCSVData",
         files,
       });
+
       this.isLoading = 2;
       this.isLoading = 0;
-      //console.log(result);
+
+      console.log(this.sqlWorker);
     },
 
     getPerUserScores() {

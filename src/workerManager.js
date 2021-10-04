@@ -12,7 +12,7 @@ export const workerManager = function (worker) {
     }
 
     return {
-        _id: 0,
+        id: 0,
         send(data) {
             if (data.id == null) {
                 throw 'Data sent to worker does not contains an ID'

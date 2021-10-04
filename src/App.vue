@@ -8,21 +8,14 @@
       :fields="fields"
       @filesLoaded="computeData"
       :isLoading="isLoading"
-      :mapScenes="scenes"
-      :mapCategories="categories"
-      :mapThemes="themes"
-      :csvData="csvData"
-      :perUserAnswers="perUserAnswers"
     />
 
     <div v-if="display == 'all'">
-      <AllRoutes :paths="paths" />
+      <AllRoutes />
     </div>
 
     <div v-if="display == 'compute'">
       <ComputedRoutes
-        :categories="categories"
-        :computedPaths="computedPaths"
         @updateAndComputePaths="updateAndComputePaths"
         @mergeThematic="mergeThematic"
       />
@@ -30,15 +23,23 @@
 
     <div v-if="display == 'categories'">
       <SceneList
-        :mapScenes="scenes"
-        :mapCategories="categories"
-        :mapThemes="themes"
-        @sceneUpdate="sceneUpdate"
+        :scenes="scenes"
+        :categories="categories"
+        :themes="themes"
+        @addCategory="addCategory"
+        @addTheme="addTheme"
+        @updateCategory="updateCategory"
+        @updateTheme="updateTheme"
+        @updateScene="updateScene"
       />
     </div>
 
     <div id="container" v-if="display == 'scorePerPath'">
       <DataByPath :data="scorePerPathData" />
+    </div>
+
+    <div id="container" v-if="display == 'SQL'">
+      <SQLPlayground :data="scorePerPathData" @SQLRequest="sqlDebug" />
     </div>
   </div>
 </template>
@@ -48,15 +49,25 @@ import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
 import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
 import DataByPath from "./components/DataViz/DataByPath";
+import SQLPlayground from "./components/SQL/SQLPlayground.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
 
 import Header from "./components/Header/Header.vue";
 
-import { wait, mapToArray } from "./utilities";
-
 import { workerManager } from "./workerManager";
+
+import {
+  getScenes,
+  getCategories,
+  getThemes,
+  addCategory,
+  addTheme,
+  updateCategory,
+  updateTheme,
+  updateScene,
+} from "./sqlRequests";
 
 export default {
   name: "App",
@@ -67,6 +78,7 @@ export default {
     Sidebar,
     SceneList,
     DataByPath,
+    SQLPlayground,
   },
   data() {
     return {
@@ -74,142 +86,23 @@ export default {
       databaseInsertion: workerManager,
       computeWorker: Worker,
       //page to show
-      display: "categories",
-      //raw general file
-      general_usage_output: [],
-      //raw detail file
-      detail_usage_output: [],
-      //an entry per session, list of scenes visited this session
-      paths: [],
-      //list of reduced and merged paths
-      computedPaths: [],
-      scorePerPathData: [],
-
-      //data about each scene
+      display: "SQL",
       scenes: [],
-      //data about each categories
       categories: [],
-      //data about each theme
       themes: [],
-
-      perUserAnswers: [],
-      csvData: "",
       isLoading: 0,
       //option for computed paths
       merge_themes: false,
-      //data files loaded
-      fields: [
-        {
-          name: "general",
-          label: "Select general data file file here",
-          defaultPath: "/general.csv",
-          format: "csv",
-        },
-        {
-          name: "detail",
-          label: "Select detail data file file here",
-          defaultPath: "/detail.csv",
-          format: "csv",
-        },
-        {
-          name: "categories",
-          label: "Select categories and themes data file here",
-          defaultPath: "/sceneInfo.json",
-          format: "json",
-        },
-      ],
     };
   },
   setup() {
     return { sidebarWidth };
   },
-  created() {
-    return;
-    this.computeWorker = new Worker("/compute.js");
-    this.computeWorker.onmessage = (e) => {
-      this.isLoading = 2;
-      wait(1).then(() => {
-        if (e.data.order == "computeData") {
-          this.scenes = e.data.scenes;
-          this.categories = e.data.categories;
-          this.themes = e.data.themes;
-          this.paths = e.data.paths;
-          this.detail_usage_output = e.data.detail_usage_output;
-          this.general_usage_output = e.data.general_usage_output;
-          this.computedPaths = e.data.computedPaths;
-          this.scorePerPathData = e.data.scorePerPathData;
-          this.getPerUserScores();
-        } else if (e.data.order == "computePaths") {
-          this.computedPaths = e.data.computedPaths;
-          this.scorePerPathData = e.data.scorePerPathData;
-        } else if (e.data.order == "perUserAnswers") {
-          this.perUserAnswers = e.data.perUserAnswers;
-        }
-        this.isLoading = 0;
-      });
-    };
-  },
+  created() {},
   computed() {},
   methods: {
-    updateAndComputePaths() {
-      this.isLoading = 1;
-      this.updatePathsWhitelist(this.paths);
-      //Ugly hack for proxy object cloning
-      this.computeWorker.postMessage(
-        JSON.parse(
-          JSON.stringify({
-            order: "computePaths",
-            paths: this.paths,
-            scenes: mapToArray(this.scenes),
-            merge_themes: this.merge_themes,
-          })
-        )
-      );
-    },
-
-    mergeThematic(e) {
-      this.isLoading = 1;
-      this.merge_themes = e;
-      //Ugly hack for proxy object cloning
-      this.computeWorker.postMessage(
-        JSON.parse(
-          JSON.stringify({
-            order: "computePaths",
-            paths: this.paths,
-            scenes: mapToArray(this.scenes),
-            merge_themes: this.merge_themes,
-          })
-        )
-      );
-    },
-
-    extractScorePerPathData(e) {
-      this.isLoading = 1;
-      //Ugly hack for proxy object cloning
-      this.computeWorker.postMessage(
-        JSON.parse(
-          JSON.stringify({
-            order: "extractPathData",
-            paths: this.paths,
-            scenes: mapToArray(this.scenes),
-          })
-        )
-      );
-    },
-
     sidebarManager(to) {
       this.display = to;
-    },
-
-    updatePathsWhitelist(paths) {
-      //adapte la whitelist d'un parcours en fonction de la whitelist des catégories
-      paths.forEach((p) => {
-        p.scenes.forEach((e) => {
-          e.whitelisted = this.categories.get(
-            this.scenes.get(e.scene).category
-          ).whitelisted;
-        });
-      });
     },
 
     sceneUpdate(scene) {
@@ -228,21 +121,56 @@ export default {
         files,
       });
 
+      this.scenes = await getScenes(this.sqlWorker);
+      this.categories = await getCategories(this.sqlWorker);
+      this.themes = await getThemes(this.sqlWorker);
       this.isLoading = 2;
       this.isLoading = 0;
-
-      console.log(this.sqlWorker);
     },
 
-    getPerUserScores() {
-      this.computeWorker.postMessage(
-        JSON.parse(
-          JSON.stringify({
-            order: "perUserAnswers",
-            paths: this.paths,
-          })
-        )
-      );
+    async addCategory(category) {
+      this.isLoading = 1;
+      await addCategory(this.sqlWorker, category);
+      this.categories = await getCategories(this.sqlWorker);
+      this.isLoading = 0;
+    },
+    async addTheme(theme) {
+      this.isLoading = 1;
+      await addTheme(this.sqlWorker, theme);
+      this.themes = await getThemes(this.sqlWorker);
+      this.isLoading = 0;
+    },
+
+    async updateCategory(category) {
+      this.isLoading = 1;
+      await updateCategory(this.sqlWorker, category);
+      this.categories = await getCategories(this.sqlWorker, category);
+      this.scenes = await getScenes(this.sqlWorker);
+      this.isLoading = 0;
+    },
+
+    async updateTheme(theme) {
+      this.isLoading = 1;
+      await updateTheme(this.sqlWorker, theme);
+      this.themes = await getThemes(this.sqlWorker, theme);
+      this.scenes = await getScenes(this.sqlWorker);
+      this.isLoading = 0;
+    },
+
+    async updateScene(scene) {
+      this.isLoading = 1;
+      await updateScene(this.sqlWorker, scene);
+      this.scenes = await getScenes(this.sqlWorker);
+      console.log(this.scenes);
+      this.isLoading = 0;
+    },
+
+    sqlDebug(request) {
+      this.sqlWorker.send({
+        id: this.sqlWorker.id++,
+        action: "debug",
+        sql: request,
+      });
     },
   },
 };

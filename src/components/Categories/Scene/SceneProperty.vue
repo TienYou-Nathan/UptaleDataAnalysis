@@ -4,22 +4,20 @@
     @dragstart="dragStart"
     @dragend="dragEnd"
     :style="{
-      background: object ? object.color : '#000000',
+      background: color,
       opacity: opacity,
       border: border,
     }"
-    :draggable="this.object && this.persistent ? true : false"
+    :draggable="this.persistent ? true : false"
     :class="persistent ? 'persistent' : null"
-    ><span class="propertyName">{{ object?.id }}</span>
+    ><span class="propertyName">{{ name }}</span>
     <input
       type="color"
-      :value="object ? object.color : '#000000'"
+      :value="color"
       v-if="persistent"
       @change="colorchange"
     />
-    <button v-if="this.object && persistent" @click="deleteProperty">
-      Delete
-    </button>
+    <button v-if="persistent" @click="deleteProperty">Delete</button>
   </span>
 </template>
 
@@ -31,14 +29,11 @@ export default {
       opacity: 1,
     };
   },
-  emits: ["deleteProperty"],
+  emits: ["deleteProperty", "updateProperty"],
   props: {
-    object: {
-      type: Object,
-    },
-    scene: {
-      type: Object,
-    },
+    id: "",
+    color: "",
+    name: "",
     persistent: {
       type: Boolean,
       default: false,
@@ -56,19 +51,20 @@ export default {
     dragStart(e) {
       e.dropEffect = "move";
       e.dataTransfer.effectAllowed = this.persistent ? "copy" : "move";
-      e.dataTransfer.setData("text", this.object.id);
+      e.dataTransfer.setData("Id", this.id);
       e.dataTransfer.setData("type", this.type);
       this.opacity = 0.5;
     },
-    dragEnd(e) {
+    dragEnd() {
       this.opacity = 1;
     },
     colorchange(e) {
-      this.object.color = e.srcElement.value;
+      this.$emit("updateProperty", {
+        color: e.srcElement.value,
+        id: this.id,
+      });
     },
-    deleteProperty() {
-      this.$emit("deleteProperty", { type: this.type, name: this.object.id });
-    },
+    deleteProperty() {},
   },
 };
 </script>

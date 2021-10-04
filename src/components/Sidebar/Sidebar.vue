@@ -43,6 +43,12 @@ export default {
       >Score per Path</SidebarLink
     >
 
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'SQL')"
+      icon="fas fa-database"
+      >SQL Playground</SidebarLink
+    >
+
     <span
       class="collapse-icon"
       :class="{ 'rotate-180': collapsed }"

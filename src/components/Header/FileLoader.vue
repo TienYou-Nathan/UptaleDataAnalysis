@@ -15,28 +15,6 @@
     <span @click="currentWindow = 'download'">
       <i class="fas fa-download icon"></i>
     </span>
-    <!-- <a
-      class="icon"
-      id="download"
-      :href="
-        'data:text/json;charset=utf-8,' +
-        encodeURIComponent(
-          JSON.stringify({
-            arrayScenes: [...mapToArray(this.mapScenes)],
-            arrayCategories: [...mapToArray(this.mapCategories)],
-            arrayThemes: [...mapToArray(this.mapThemes)],
-          })
-        )
-      "
-    >
-      <i class="fas fa-download icon" @click="download"></i
-    ></a> -->
-    <!-- <a
-      class="icon"
-      id="downloadCSV"
-      :href="'data:text/csv;charset=utf-8,' + csvData"
-      ><i class="fas fa-file-csv"></i
-    ></a> -->
   </div>
   <Prompt
     v-if="currentWindow == 'upload'"
@@ -86,10 +64,22 @@ export default {
       type: Array,
       default: [
         {
-          name: "fileLoader",
-          label: "Select a file here",
-          defaultPath: "",
-          format: ".csv",
+          name: "general",
+          label: "Select general data file file here",
+          defaultPath: "/general.csv",
+          format: "csv",
+        },
+        {
+          name: "detail",
+          label: "Select detail data file file here",
+          defaultPath: "/detail.csv",
+          format: "csv",
+        },
+        {
+          name: "categories",
+          label: "Select categories and themes data file here",
+          defaultPath: "/sceneInfo.json",
+          format: "json",
         },
       ],
     },

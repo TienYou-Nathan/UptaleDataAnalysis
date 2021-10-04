@@ -418,7 +418,15 @@ async function test() {
 }
 
 async function debug(request) {
-    let output = (await sqlWorker.send(request))
+    let output = await sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql: request
+    })
+    if (output.error) {
+        throw output.error;
+    }
     console.log("output", output.results[0].columns)
     console.table(output.results[0].values)
+    return output
 }

@@ -8,35 +8,38 @@
 
   <div id="sceneList">
     <Scene
-      v-for="scene in mapToArray(mapScenes)"
-      :key="scene.id"
+      v-for="scene in scenes"
+      :key="scene.Id"
       :scene="scene"
-      :mapCategories="mapCategories"
-      :mapThemes="mapThemes"
-      :mapScenes="mapScenes"
-      @sceneUpdate="$emit('sceneUpdate', $event)"
+      @updateScene="$emit('updateScene', $event)"
     />
     <div id="categoryList">
       <div class="sticky">
         <SceneProperty
-          v-for="category in mapToArray(mapCategories)"
-          :key="category.id"
-          :object="category"
+          v-for="category in categories"
+          :key="category.Id"
+          :id="category.Id"
+          :name="category.Name"
+          :color="category.Color"
           :persistent="true"
           :type="'category'"
           @deleteProperty="removeProperty"
+          @updateProperty="$emit('updateCategory', $event)"
         />
       </div>
     </div>
     <div id="themeList">
       <div class="sticky">
         <SceneProperty
-          v-for="theme in mapToArray(mapThemes)"
-          :key="theme.id"
-          :object="theme"
+          v-for="theme in themes"
+          :key="theme.Id"
+          :id="theme.Id"
+          :name="theme.Name"
+          :color="theme.Color"
           :persistent="true"
           :type="'theme'"
           @deleteProperty="removeProperty"
+          @updateProperty="$emit('updateTheme', $event)"
         />
       </div>
     </div>
@@ -46,58 +49,45 @@
 <script>
 import Scene from "./Scene/Scene.vue";
 import SceneProperty from "./Scene/SceneProperty.vue";
-import { mapToArray } from "../../utilities";
 
 export default {
   name: "SceneList",
+  emits: ["addCategory", "addTheme"],
   components: {
     Scene,
     SceneProperty,
   },
   props: {
-    mapScenes: {
-      type: Map,
+    scenes: {
+      type: Array,
       default: [],
     },
-    mapCategories: {
-      type: Map,
+    categories: {
+      type: Array,
       default: [],
     },
-    mapThemes: {
-      type: Map,
+    themes: {
+      type: Array,
       default: [],
     },
   },
   created() {},
   methods: {
+    removeProperty() {},
     addCategory(e) {
       e.preventDefault();
-      this.mapCategories.set(
-        e.srcElement.querySelector("#categoryName").value,
-        {
-          color: "#ffffff",
-        }
-      );
-    },
-    addTheme(e) {
-      e.preventDefault();
-      this.mapThemes.set(e.srcElement.querySelector("#themeName").value, {
+      this.$emit("addCategory", {
+        name: e.srcElement.querySelector("#categoryName").value,
         color: "#ffffff",
       });
     },
-    mapToArray(data) {
-      return mapToArray(data);
-    },
-    removeProperty({ type, name }) {
-      let target;
 
-      if (type == "category") {
-        target = this.mapCategories;
-      } else if (type == "theme") {
-        target = this.mapThemes;
-      }
-
-      target.delete(name);
+    addTheme(e) {
+      e.preventDefault();
+      this.$emit("addTheme", {
+        name: e.srcElement.querySelector("#themeName").value,
+        color: "#ffffff",
+      });
     },
   },
 };

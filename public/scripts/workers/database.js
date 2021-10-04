@@ -26,9 +26,16 @@ onmessage = async (e) => {
             action: "export",
         })).buffer
     } else {
-        let sendData = { ...e.data, ...{ id: sqlWorker.id++ } }
-        await debug(sendData)
-        message.results = await sqlWorker.send(sendData)
+        if (e.data.action == "debug") {
+            message.results = await debug(e.data.sql)
+        } else {
+            message.results = (await sqlWorker.send({
+                id: sqlWorker.id++,
+                action: "exec",
+                sql: e.data.sql,
+                params: e.data.params
+            })).results
+        }
     }
     message.action = e.data.action
     postMessage(message)

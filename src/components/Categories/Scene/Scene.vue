@@ -7,17 +7,19 @@
     @drop="drop"
     :style="{ border: '1px solid ' + border_color }"
   >
-    <span>{{ scene.id }}</span>
+    <span>{{ scene.Name }}</span>
 
     <SceneProperty
-      :object="this.mapCategories.get(scene.category)"
-      :scene="scene"
+      :id="scene.CategoryId"
+      :name="scene.CategoryName"
+      :color="scene.CategoryColor"
       :type="'category'"
       :border="borders.category"
     />
     <SceneProperty
-      :object="this.mapThemes.get(scene.theme)"
-      :scene="scene"
+      :id="scene.ThemeId"
+      :name="scene.ThemeName"
+      :color="scene.ThemeColor"
       :type="'theme'"
       :border="borders.theme"
     />
@@ -29,6 +31,7 @@ import SceneProperty from "./SceneProperty.vue";
 
 export default {
   name: "Scene",
+  emits: ["updateScene"],
   components: {
     SceneProperty,
   },
@@ -73,12 +76,19 @@ export default {
     },
     drop(e) {
       e.preventDefault();
+
       this.border_color = "transparent";
       this.borders[e.dataTransfer.getData("type")] = null;
-      let type = e.dataTransfer.getData("type");
-      //set sceneproperty to this scene
-      this.scene[type] = e.dataTransfer.getData("text");
-      this.$emit("sceneUpdate", this.scene);
+      if (e.dataTransfer.getData("type") == "theme") {
+        this.scene.ThemeId = e.dataTransfer.getData("Id");
+      } else if (e.dataTransfer.getData("type") == "category") {
+        this.scene.CategoryId = e.dataTransfer.getData("Id");
+      }
+      this.$emit("updateScene", {
+        sceneId: this.scene.Id,
+        categoryId: this.scene.CategoryId,
+        themeId: this.scene.ThemeId,
+      });
     },
   },
 };

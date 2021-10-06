@@ -10,17 +10,6 @@
       :isLoading="isLoading"
     />
 
-    <div v-if="display == 'all'">
-      <AllRoutes />
-    </div>
-
-    <div v-if="display == 'compute'">
-      <ComputedRoutes
-        @updateAndComputePaths="updateAndComputePaths"
-        @mergeThematic="mergeThematic"
-      />
-    </div>
-
     <div v-if="display == 'categories'">
       <SceneList
         :scenes="scenes"
@@ -34,8 +23,14 @@
       />
     </div>
 
-    <div id="container" v-if="display == 'scorePerPath'">
-      <DataByPath :data="scorePerPathData" />
+    <div id="container" v-if="display == 'Users'">
+      <UsersSetup
+        :users="users"
+        :usersGroups="usersGroups"
+        @addUserGroup="addUserGroup"
+        @updateUser="updateUser"
+        @updateUserGroup="updateUserGroup"
+      />
     </div>
 
     <div id="container" v-if="display == 'SQL'">
@@ -45,11 +40,10 @@
 </template>
 
 <script>
-import ComputedRoutes from "./components/Routes/Computed/ComputedRoutes.vue";
-import AllRoutes from "./components/Routes/All/AllRoutes.vue";
 import SceneList from "./components/Categories/SceneList.vue";
-import DataByPath from "./components/DataViz/DataByPath";
 import SQLPlayground from "./components/SQL/SQLPlayground.vue";
+
+import UsersSetup from "./components/Users/UsersSetup.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -62,23 +56,26 @@ import {
   getScenes,
   getCategories,
   getThemes,
+  getUsers,
+  getUsersGroups,
   addCategory,
   addTheme,
+  addUserGroup,
   updateCategory,
   updateTheme,
   updateScene,
+  updateUserGroup,
+  updateUser,
 } from "./sqlRequests";
 
 export default {
   name: "App",
   components: {
     Header,
-    ComputedRoutes,
-    AllRoutes,
-    Sidebar,
     SceneList,
-    DataByPath,
+    Sidebar,
     SQLPlayground,
+    UsersSetup,
   },
   data() {
     return {
@@ -124,6 +121,8 @@ export default {
       this.scenes = await getScenes(this.sqlWorker);
       this.categories = await getCategories(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker);
+      this.usersGroups = await getUsersGroups(this.sqlWorker);
       this.isLoading = 2;
       this.isLoading = 0;
     },
@@ -141,10 +140,17 @@ export default {
       this.isLoading = 0;
     },
 
+    async addUserGroup(userGroup) {
+      this.isLoading = 1;
+      await addUserGroup(this.sqlWorker, userGroup);
+      this.usersGroups = await getUsersGroups(this.sqlWorker);
+      this.isLoading = 0;
+    },
+
     async updateCategory(category) {
       this.isLoading = 1;
       await updateCategory(this.sqlWorker, category);
-      this.categories = await getCategories(this.sqlWorker, category);
+      this.categories = await getCategories(this.sqlWorker);
       this.scenes = await getScenes(this.sqlWorker);
       this.isLoading = 0;
     },
@@ -152,7 +158,7 @@ export default {
     async updateTheme(theme) {
       this.isLoading = 1;
       await updateTheme(this.sqlWorker, theme);
-      this.themes = await getThemes(this.sqlWorker, theme);
+      this.themes = await getThemes(this.sqlWorker);
       this.scenes = await getScenes(this.sqlWorker);
       this.isLoading = 0;
     },
@@ -161,7 +167,22 @@ export default {
       this.isLoading = 1;
       await updateScene(this.sqlWorker, scene);
       this.scenes = await getScenes(this.sqlWorker);
-      console.log(this.scenes);
+      this.isLoading = 0;
+    },
+
+    async updateUserGroup(userGroup) {
+      this.isLoading = 1;
+      await updateUserGroup(this.sqlWorker, userGroup);
+      this.usersGroups = await getUsersGroups(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker);
+      this.isLoading = 0;
+    },
+
+    async updateUser(user) {
+      this.isLoading = 1;
+      await updateUser(this.sqlWorker, user);
+      this.users = await getUsers(this.sqlWorker);
+      console.log(this.users);
       this.isLoading = 0;
     },
 

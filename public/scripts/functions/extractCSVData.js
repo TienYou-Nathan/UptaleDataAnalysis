@@ -57,9 +57,22 @@ let isReady = sqlWorker.send({
         id: sqlWorker.id++,
         action: "exec",
         sql:
+            `CREATE TABLE IF NOT EXISTS UsersGroups (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT,
+                Color TEXT
+            )`,
+    })
+
+    await sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql:
             `CREATE TABLE IF NOT EXISTS Users (
                 Id TEXT PRIMARY KEY,
-                Name TEXT
+                Name TEXT,
+                UserGroupId INTEGER,
+                FOREIGN KEY (UserGroupId) REFERENCES UsersGroups(Id)
             )`,
     })
     await sqlWorker.send({

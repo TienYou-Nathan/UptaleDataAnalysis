@@ -35,7 +35,7 @@ export async function getScenes(sqlWorker) {
         LEFT JOIN Categories 
             ON Categories.Id = Scenes.CategoryId 
         LEFT JOIN Themes 
-        ON Themes.Id = Scenes.ThemeId`)
+            ON Themes.Id = Scenes.ThemeId`)
 }
 
 export async function getCategories(sqlWorker) {
@@ -76,4 +76,38 @@ export async function updateScene(sqlWorker, scene) {
     return requestSQL(sqlWorker,
         `UPDATE Scenes SET CategoryId = $categoryId, ThemeId = $themeId WHERE Id = $id`,
         { $id: scene.sceneId, $categoryId: scene.categoryId, $themeId: scene.themeId })
+}
+
+export async function getUsers(sqlWorker) {
+    return requestSQL(sqlWorker,
+        `SELECT Users.Id, 
+            Users.Name, 
+            UserGroupId, 
+            UsersGroups.Color 
+        FROM USERS 
+        LEFT JOIN USERSGROUPS 
+            ON Users.UserGroupId = UsersGroups.Id`)
+}
+
+export async function getUsersGroups(sqlWorker) {
+    return requestSQL(sqlWorker,
+        `SELECT Id, Name, Color FROM UsersGroups`)
+}
+
+export async function addUserGroup(sqlWorker, userGroup) {
+    return requestSQL(sqlWorker,
+        "INSERT INTO UsersGroups (Name, Color) VALUES ($name, $color)",
+        { $name: userGroup.name, $color: userGroup.color })
+}
+
+export async function updateUserGroup(sqlWorker, userGroup) {
+    return requestSQL(sqlWorker,
+        `UPDATE UsersGroups SET Color = $color WHERE Id = $id`,
+        { $id: userGroup.id, $color: userGroup.color })
+}
+
+export async function updateUser(sqlWorker, user) {
+    return requestSQL(sqlWorker,
+        `UPDATE Users SET UserGroupId = $userGroupId WHERE Id = $id`,
+        { $id: user.id, $userGroupId: user.userGroupId })
 }

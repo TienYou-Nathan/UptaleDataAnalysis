@@ -20,17 +20,6 @@ export default {
       </span>
       <span v-else>Vue Sidebar</span>
     </h1>
-
-    <SidebarLink
-      @sidebar_click="$emit('sidebar_click', 'all')"
-      icon="fas fa-home"
-      >All Routes</SidebarLink
-    >
-    <SidebarLink
-      @sidebar_click="$emit('sidebar_click', 'compute')"
-      icon="fas fa-columns"
-      >Computed Routes</SidebarLink
-    >
     <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'categories')"
       icon="fas fa-edit"
@@ -38,9 +27,9 @@ export default {
     >
 
     <SidebarLink
-      @sidebar_click="$emit('sidebar_click', 'scorePerPath')"
-      icon="far fa-chart-bar"
-      >Score per Path</SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'Users')"
+      icon="fas fa-edit"
+      >Users Setup</SidebarLink
     >
 
     <SidebarLink

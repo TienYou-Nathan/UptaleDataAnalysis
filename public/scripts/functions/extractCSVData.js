@@ -1,7 +1,4 @@
-let isReady = sqlWorker.send({
-    id: sqlWorker.id++,
-    action: "open",
-}).then(async () => {
+async function initializeDB() {
     tableCreation = []
     scenesCreation = []
 
@@ -35,8 +32,8 @@ let isReady = sqlWorker.send({
                     Name TEXT,
                     CategoryId INTEGER,
                     ThemeId INTEGER,
-                    FOREIGN KEY(CategoryId) REFERENCES Categories(Id),
-                    FOREIGN KEY(ThemeId) REFERENCES Themes(Id)
+                    FOREIGN KEY(CategoryId) REFERENCES Categories(Id) ON DELETE CASCADE,
+                    FOREIGN KEY(ThemeId) REFERENCES Themes(Id) ON DELETE CASCADE
                 )`,
     })
 
@@ -48,7 +45,7 @@ let isReady = sqlWorker.send({
                     Id TEXT NOT NULL,
                     Name TEXT,
                     SceneId TEXT NOT NULL,
-                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id)
+                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id) ON DELETE CASCADE,
                     PRIMARY KEY(Id, SceneId)
                 )`,
     })
@@ -72,7 +69,7 @@ let isReady = sqlWorker.send({
                 Id TEXT PRIMARY KEY,
                 Name TEXT,
                 UserGroupId INTEGER,
-                FOREIGN KEY (UserGroupId) REFERENCES UsersGroups(Id)
+                FOREIGN KEY (UserGroupId) REFERENCES UsersGroups(Id) ON DELETE CASCADE
             )`,
     })
     await sqlWorker.send({
@@ -84,7 +81,7 @@ let isReady = sqlWorker.send({
                     UserId TEXT,
                     StartTime TEXT,
                     EndTime TEXT,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 )`,
     })
 
@@ -99,8 +96,8 @@ let isReady = sqlWorker.send({
                     Timestamp TEXT,
                     IsCorrect INTEGER,
                     Answer TEXT,
-                    FOREIGN KEY(TagId) REFERENCES QCM(Id),
-                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id)
+                    FOREIGN KEY(TagId) REFERENCES QCM(Id) ON DELETE CASCADE,
+                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id) ON DELETE CASCADE
                 )`,
     })
 
@@ -113,11 +110,11 @@ let isReady = sqlWorker.send({
                     SessionId TEXT,
                     EnterTime TEXT,
                     SceneId TEXT,
-                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id),
-                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id)
+                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id) ON DELETE CASCADE,
+                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id) ON DELETE CASCADE
                 )`,
     })
-});
+};
 
 var globalDataStruct = {
     _sessions: null,

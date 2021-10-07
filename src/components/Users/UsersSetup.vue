@@ -12,6 +12,11 @@
           :value="group.Color"
           @change="colorchange($event, group.Id)"
         />
+        <input
+          type="button"
+          @click="deleteUserGroup(group.Id)"
+          value="Delete"
+        />
       </th>
     </tr>
     <tr v-for="user in users" :key="user.Id">
@@ -39,8 +44,8 @@ export default {
   emits: ["addUserGroup", "updateUser", "updateUserGroup"],
   components: {},
   props: {
-    users: [],
-    usersGroups: [],
+    users: Array,
+    usersGroups: Array,
   },
   created() {},
   methods: {
@@ -49,6 +54,9 @@ export default {
         name: e.srcElement.querySelector("#userGroup").value,
         color: "#ffffff",
       });
+    },
+    deleteUserGroup(groupId) {
+      this.$emit("deleteUserGroup", { id: groupId });
     },
     updateUser(userId, groupId) {
       this.$emit("updateUser", { id: userId, userGroupId: groupId });

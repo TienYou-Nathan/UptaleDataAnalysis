@@ -1,16 +1,17 @@
 self.importScripts("workerManager.js")
-const sqlWorker = workerManager(new Worker("worker.sql-wasm.js"));
+const SQL = new Worker("worker.sql-wasm.js")
+const sqlWorker = workerManager(SQL);
 
 self.importScripts("../functions/cleanCSVFile.js")
 self.importScripts("../functions/extractCSVData.js")
 
 onmessage = async (e) => {
     let message = { id: e.data.id }
-    await isReady
     if (e.data.action == "extractCSVData") {
         globalDataStruct.reset()
         e.data.files.detail = cleanCSVFile(e.data.files.detail)
 
+        await initializeDB()
         await extractScenes(e.data.files.detail);
         await extractQCM(e.data.files.detail);
 
@@ -20,23 +21,28 @@ onmessage = async (e) => {
 
         await extractSceneVisits(e.data.files.detail);
         // await test()
-
-        message.buffer = (await sqlWorker.send({
-            id: sqlWorker.id++,
-            action: "export",
-        })).buffer
-    } else {
-        if (e.data.action == "debug") {
-            message.results = await debug(e.data.sql)
-        } else {
-            message.results = (await sqlWorker.send({
-                id: sqlWorker.id++,
-                action: "exec",
-                sql: e.data.sql,
-                params: e.data.params
-            })).results
-        }
+    } else if (e.data.action == "debug") {
+        message.results = await debug(e.data.sql)
     }
-    message.action = e.data.action
+    else if (e.data.action == "export") {
+        message.results = (await sqlWorker.send({
+            id: sqlWorker.id++,
+            action: e.data.action,
+        })).buffer
+    } else if (e.data.action == "open") {
+        message.results = (await sqlWorker.send({
+            id: sqlWorker.id++,
+            action: e.data.action,
+            buffer: e.data.buffer,
+        }))
+    } else {
+        message.results = (await sqlWorker.send({
+            id: sqlWorker.id++,
+            action: e.data.action,
+            sql: e.data.sql,
+            params: e.data.params
+        })).results
+    }
     postMessage(message)
 }
+

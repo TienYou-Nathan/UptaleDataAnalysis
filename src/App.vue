@@ -1,12 +1,18 @@
 <template>
   <Sidebar @sidebar_click="sidebarManager" />
-
+  <a
+    id="download"
+    display="none"
+    :href="serializedDatabaseURL"
+    download="database.sql"
+  />
   <div id="nav" :style="{ 'margin-left': sidebarWidth }">
     <Header
       id="Header"
       title="VR@COVID Paths Analysis"
       :fields="fields"
       @filesLoaded="computeData"
+      @downloadDatabase="downloadDatabase"
       :isLoading="isLoading"
     />
 
@@ -30,6 +36,7 @@
         @addUserGroup="addUserGroup"
         @updateUser="updateUser"
         @updateUserGroup="updateUserGroup"
+        @deleteUserGroup="deleteUserGroup"
       />
     </div>
 
@@ -66,6 +73,7 @@ import {
   updateScene,
   updateUserGroup,
   updateUser,
+  deleteUserGroup,
 } from "./sqlRequests";
 
 export default {
@@ -79,9 +87,11 @@ export default {
   },
   data() {
     return {
+      title: "VR@COVID Paths Analysis",
       sqlWorker: workerManager,
       databaseInsertion: workerManager,
       computeWorker: Worker,
+      serializedDatabase: String,
       //page to show
       display: "SQL",
       scenes: [],
@@ -112,12 +122,24 @@ export default {
       this.sqlWorker = workerManager(
         new Worker("/scripts/workers/database.js")
       );
-      await this.sqlWorker.send({
-        id: this.sqlWorker.id++,
-        action: "extractCSVData",
-        files,
-      });
+      if (files.database) {
+        await this.sqlWorker.send({
+          id: this.sqlWorker.id++,
+          action: "open",
+          buffer: files.database,
+        });
+      } else {
+        await this.sqlWorker.send({
+          id: this.sqlWorker.id++,
+          action: "open",
+        });
 
+        await this.sqlWorker.send({
+          id: this.sqlWorker.id++,
+          action: "extractCSVData",
+          files,
+        });
+      }
       this.scenes = await getScenes(this.sqlWorker);
       this.categories = await getCategories(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
@@ -182,8 +204,35 @@ export default {
       this.isLoading = 1;
       await updateUser(this.sqlWorker, user);
       this.users = await getUsers(this.sqlWorker);
-      console.log(this.users);
       this.isLoading = 0;
+    },
+    async deleteUserGroup(groupId) {
+      this.isLoading = 1;
+      console.log("deleteUserGroup");
+      await deleteUserGroup(this.sqlWorker, groupId);
+      console.log("getUsersGroups");
+      this.usersGroups = await getUsersGroups(this.sqlWorker);
+      console.log("getUsers");
+      this.users = await getUsers(this.sqlWorker);
+      this.isLoading = 0;
+    },
+    async getSerializedDatabase() {
+      let data = (
+        await this.sqlWorker.send({
+          id: this.sqlWorker.id++,
+          action: "export",
+        })
+      ).results;
+      return new Blob([data], { type: "application/octet-stream" });
+    },
+    async downloadDatabase() {
+      this.loading = 1;
+      this.serializedDatabase = await this.getSerializedDatabase();
+      URL.revokeObjectURL(this.serializedDatabaseURL);
+      this.serializedDatabaseURL = URL.createObjectURL(this.serializedDatabase);
+      this.loading = 0;
+      download.setAttribute("href", this.serializedDatabaseURL);
+      download.click();
     },
 
     sqlDebug(request) {

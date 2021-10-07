@@ -15,7 +15,12 @@ async function requestSQL(sqlWorker, request, params) {
         action: "exec",
         sql: request,
         params: params
-    })).results[0]
+    }))
+    if (results && results.results) {
+        results = results.results[0]
+    } else {
+        results = null
+    }
     return resultsToObject(results)
 }
 
@@ -104,6 +109,12 @@ export async function updateUserGroup(sqlWorker, userGroup) {
     return requestSQL(sqlWorker,
         `UPDATE UsersGroups SET Color = $color WHERE Id = $id`,
         { $id: userGroup.id, $color: userGroup.color })
+}
+
+export async function deleteUserGroup(sqlWorker, groupId) {
+    return requestSQL(sqlWorker,
+        `DELETE FROM UsersGroups WHERE Id = $id`,
+        { $id: groupId.id })
 }
 
 export async function updateUser(sqlWorker, user) {

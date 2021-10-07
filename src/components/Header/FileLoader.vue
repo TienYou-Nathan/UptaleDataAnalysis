@@ -12,7 +12,7 @@
     <span @click="currentWindow = 'upload'">
       <i class="fas fa-upload icon"></i>
     </span>
-    <span @click="currentWindow = 'download'">
+    <span @click="getSerializedDatabase">
       <i class="fas fa-download icon"></i>
     </span>
   </div>
@@ -22,12 +22,6 @@
     @fileChange="fileChange"
     @currentWindowChange="currentWindow = $event"
     :type="'largePanels'"
-  />
-  <Prompt
-    v-if="currentWindow == 'download'"
-    :data="perUserAnswers"
-    @currentWindowChange="currentWindow = $event"
-    :type="'propList'"
   />
 </template>
 
@@ -42,33 +36,16 @@ export default {
   data() {
     return {
       currentWindow: "",
+      isLoadingSerializedDatabase: 0,
     };
   },
   props: {
-    mapScenes: {
-      type: Map,
-      default: [],
-    },
-    mapCategories: {
-      type: Map,
-      default: [],
-    },
-    mapThemes: {
-      type: Map,
-      default: [],
-    },
-    csvData: String,
     isLoading: Number,
     perUserAnswers: Object,
+    serializedDatabase: [],
     fields: {
       type: Array,
       default: [
-        {
-          name: "general",
-          label: "Select general data file file here",
-          defaultPath: "/general.csv",
-          format: "csv",
-        },
         {
           name: "detail",
           label: "Select detail data file file here",
@@ -76,15 +53,15 @@ export default {
           format: "csv",
         },
         {
-          name: "categories",
-          label: "Select categories and themes data file here",
-          defaultPath: "/sceneInfo.json",
-          format: "json",
+          name: "database",
+          label: "Select database file here",
+          defaultPath: "/database.sql",
+          format: "sql",
         },
       ],
     },
   },
-  emits: ["filesLoaded"],
+  emits: ["filesLoaded", "updateSerializedDatabase"],
   methods: {
     load_file: async function (file) {
       function readFileAsync(file) {
@@ -110,29 +87,44 @@ export default {
     },
     startAnalysis: async function () {
       let query = [];
-
-      this.fields.forEach((f) => {
-        let request = f.file;
-        query.push(
-          request != undefined
-            ? this.load_file(request)
-            : d3[f.format](f.defaultPath)
-        );
-      });
       let result = {};
+
+      query.push(
+        this.fields[0].file != undefined
+          ? this.load_file(this.fields[0].file)
+          : d3[this.fields[0].format](this.fields[0].defaultPath)
+      );
+      //If user selected a database manually
+      if (this.fields[1].file) {
+        result.database = new Uint8Array(
+          await this.fields[1].file.arrayBuffer()
+        );
+        //if no database is selected but one is by default
+      } else if (
+        (await (await fetch("./database.sql")).blob()).type ==
+        "application/x-sql; charset=utf-8"
+      ) {
+        result.database = new Uint8Array(
+          await (await fetch("./database.sql")).arrayBuffer()
+        );
+      }
+
       let arr = await Promise.all(query);
-      this.fields.forEach((f, i) => {
-        result[f.name] = arr[i];
-      });
+
+      result[this.fields[0].name] = arr[0];
+
       this.$emit("filesLoaded", result);
     },
-
     fileChange(e) {
       this.fields.find((field) => field.name == e.target.id).file =
         e.target.files[0];
     },
     mapToArray(data) {
       return mapToArray(data);
+    },
+    getSerializedDatabase() {
+      this.isLoadingSerializedDatabase = 1;
+      this.$emit("downloadDatabase");
     },
   },
 };

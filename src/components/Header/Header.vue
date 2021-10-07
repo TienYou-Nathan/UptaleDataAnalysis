@@ -3,13 +3,10 @@
     <h1>{{ title }}</h1>
     <FileLoader
       @filesLoaded="filesLoaded"
+      @downloadDatabase="$emit('downloadDatabase')"
       :fields="fields"
       :isLoading="isLoading"
-      :mapScenes="mapScenes"
-      :mapCategories="mapCategories"
-      :mapThemes="mapThemes"
-      :csvData="csvData"
-      :perUserAnswers="perUserAnswers"
+      :serializedDatabase="serializedDatabase"
     />
   </header>
 </template>
@@ -20,31 +17,18 @@ import FileLoader from "./FileLoader.vue";
 export default {
   name: "Header",
   components: { FileLoader },
-  emits: ["filesLoaded"],
+  emits: ["filesLoaded", "updateSerializedDatabase"],
   data() {
     return {};
   },
   props: {
-    mapScenes: {
-      type: Map,
-      default: [],
-    },
-    mapCategories: {
-      type: Map,
-      default: [],
-    },
-    mapThemes: {
-      type: Map,
-      default: [],
-    },
+    serializedDatabase: [],
     title: {
       type: String,
       default: "[Insert Title here]",
     },
     perUserAnswers: Object,
-    csvData: String,
     isLoading: Number,
-    fields: {},
   },
   methods: {
     filesLoaded(data) {

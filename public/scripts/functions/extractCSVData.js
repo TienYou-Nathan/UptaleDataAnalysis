@@ -45,7 +45,21 @@ async function initializeDB() {
                     Id TEXT NOT NULL,
                     Name TEXT,
                     SceneId TEXT NOT NULL,
-                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id) ON DELETE CASCADE,
+                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id),
+                    PRIMARY KEY(Id, SceneId)
+                )`,
+    })
+
+    await sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql:
+            `CREATE TABLE IF NOT EXISTS Topics (
+                    Id TEXT NOT NULL,
+                    Name TEXT,
+                    SceneId TEXT NOT NULL,
+                    Type TEXT NOT NULL,
+                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id),
                     PRIMARY KEY(Id, SceneId)
                 )`,
     })
@@ -81,7 +95,7 @@ async function initializeDB() {
                     UserId TEXT,
                     StartTime TEXT,
                     EndTime TEXT,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+                    FOREIGN KEY (UserId) REFERENCES Users(Id)
                 )`,
     })
 
@@ -96,8 +110,22 @@ async function initializeDB() {
                     Timestamp TEXT,
                     IsCorrect INTEGER,
                     Answer TEXT,
-                    FOREIGN KEY(TagId) REFERENCES QCM(Id) ON DELETE CASCADE,
-                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id) ON DELETE CASCADE
+                    FOREIGN KEY(TagId) REFERENCES QCM(Id),
+                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id)
+                )`,
+    })
+
+    await sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql:
+            `CREATE TABLE IF NOT EXISTS TopicsClicks (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TopicId TEXT,
+                    SessionId TEXT NOT NULL,
+                    Timestamp TEXT NOT NULL,
+                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id),
+                    FOREIGN KEY (TopicId) REFERENCES Topic(Id)
                 )`,
     })
 
@@ -110,8 +138,8 @@ async function initializeDB() {
                     SessionId TEXT,
                     EnterTime TEXT,
                     SceneId TEXT,
-                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id) ON DELETE CASCADE,
-                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id) ON DELETE CASCADE
+                    FOREIGN KEY(SessionId) REFERENCES Sessions(Id),
+                    FOREIGN KEY(SceneId) REFERENCES Scenes(Id)
                 )`,
     })
 };

@@ -14,13 +14,16 @@ onmessage = async (e) => {
     await initializeDB();
     await extractScenes(e.data.files.detail);
     await extractQCM(e.data.files.detail);
+    await extractTopics(e.data.files.detail)
 
     await extractUsers(e.data.files.detail);
     await extractSessions(e.data.files.detail);
     await extractQCMAnswers(e.data.files.detail);
 
     await extractSceneVisits(e.data.files.detail);
-    // await test()
+    await extractTopicClicks(e.data.files.detail)
+
+    await test()
   } else if (e.data.action == "export") {
     message.results = (
       await sqlWorker.send({

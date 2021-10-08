@@ -45,7 +45,7 @@ function cleanCSVFile(details) {
     });
 
     details = details.filter(e =>
-        e.EventName != "Launch_HeatMap" && e.EventName != "Launch_TopicClick"
+        e.EventName != "Launch_HeatMap"
     )
 
     return details

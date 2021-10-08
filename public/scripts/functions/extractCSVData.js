@@ -1,33 +1,30 @@
 async function initializeDB() {
-    tableCreation = []
-    scenesCreation = []
+  tableCreation = [];
+  scenesCreation = [];
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS Categories (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS Categories (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT,
                 Color TEXT
             )`,
-    })
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS Themes (
+  });
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS Themes (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT,
                 Color TEXT
             )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS Scenes (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS Scenes (
                     Id TEXT NOT NULL PRIMARY KEY,
                     Name TEXT,
                     CategoryId INTEGER,
@@ -35,13 +32,12 @@ async function initializeDB() {
                     FOREIGN KEY(CategoryId) REFERENCES Categories(Id) ON DELETE CASCADE,
                     FOREIGN KEY(ThemeId) REFERENCES Themes(Id) ON DELETE CASCADE
                 )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS QCM (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS QCM (
                     Id TEXT NOT NULL,
                     Name TEXT,
                     SceneId TEXT NOT NULL,
@@ -62,48 +58,44 @@ async function initializeDB() {
                     FOREIGN KEY(SceneId) REFERENCES Scenes(Id),
                     PRIMARY KEY(Id, SceneId)
                 )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS UsersGroups (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS UsersGroups (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT,
                 Color TEXT
             )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS Users (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS Users (
                 Id TEXT PRIMARY KEY,
                 Name TEXT,
                 UserGroupId INTEGER,
                 FOREIGN KEY (UserGroupId) REFERENCES UsersGroups(Id) ON DELETE CASCADE
             )`,
-    })
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS Sessions (
+  });
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS Sessions (
                     Id TEXT PRIMARY KEY,
                     UserId TEXT,
                     StartTime TEXT,
                     EndTime TEXT,
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
                 )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS QCMAnswers (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS QCMAnswers (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     TagId TEXT,
                     SessionId TEXT,
@@ -127,13 +119,12 @@ async function initializeDB() {
                     FOREIGN KEY(SessionId) REFERENCES Sessions(Id),
                     FOREIGN KEY (TopicId) REFERENCES Topic(Id)
                 )`,
-    })
+  });
 
-    await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `CREATE TABLE IF NOT EXISTS SceneVisit (
+  await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `CREATE TABLE IF NOT EXISTS SceneVisit (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     SessionId TEXT,
                     EnterTime TEXT,
@@ -141,330 +132,360 @@ async function initializeDB() {
                     FOREIGN KEY(SessionId) REFERENCES Sessions(Id),
                     FOREIGN KEY(SceneId) REFERENCES Scenes(Id)
                 )`,
-    })
-};
+  });
+}
 
 var globalDataStruct = {
-    _sessions: null,
-    _sessionsWithScenes: null,
-    _sessionsWithQCMScenes: null,
-    reset() {
-        delete this._sessions
-    },
-    getSessions(details, force = false) {
-        if (!this._sessions || force) {
-            this._sessions = Object.values(details.reduce((acc, e) => {
-                if (!acc[e.SessionId]) {
-                    acc[e.SessionId] = {}
-                    acc[e.SessionId].SessionId = e.SessionId
-                    acc[e.SessionId].LearnerName = e.LearnerName
-                    acc[e.SessionId].actions = []
-                }
-                acc[e.SessionId].actions.push(e)
-                return acc
-            }, {}))
-        }
-        return this._sessions
-    },
-    getSessionsWithScenes(details, force = false) {
-        if (!this._sessionsWithcenes || force) {
-            if (!this._sessions) {
-                this.getSessions(details)
-            }
-            let sessions = [...this._sessions]
-
-            sessions.forEach(e => {
-                let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
-                    if (val.EventName == "Launch_ChangeWorld") {
-                        acc.push(index)
-                    }
-                    return acc
-                }, [])
-                e.scenes = []
-                for (let i = 0; i < indexesOfChangeWorld.length; i++) {
-                    let currentSceneActions = e.actions.slice(indexesOfChangeWorld[i], indexesOfChangeWorld[i + 1])
-                    e.scenes.push(currentSceneActions)
-                }
-            })
-            this._sessionsWithcenes = sessions
-        }
-        return this._sessionsWithcenes
-    },
-    getSessionsWithQCMScenes(details, force = false) {
-        if (!this._sessionsWithQCMScenes || force) {
-            if (!this._sessions) {
-                this.getSessions(details)
-            }
-            let sessions = [...this._sessions]
-
-            sessions.forEach(e => {
-                let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
-                    if (val.EventName == "Launch_ChangeWorld") {
-                        acc.push(index)
-                    }
-                    return acc
-                }, [])
-                e.scenes = []
-                for (let i = 0; i < indexesOfChangeWorld.length; i++) {
-                    let currentSceneActions = e.actions.slice(indexesOfChangeWorld[i], indexesOfChangeWorld[i + 1])
-                    let currentSceneQCMs = currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick")
-                    if (currentSceneQCMs.length > 0) {
-                        let currentScene = {
-                            scene: currentSceneActions[0].SceneId,
-                            zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
-                            zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
-                            actions: currentSceneActions,
-                            QCMs: currentSceneQCMs
-                        }
-                        e.scenes.push(currentScene)
-                    }
-
-                }
-            })
-            this._sessionsWithQCMScenes = sessions
-        }
-        return this._sessionsWithQCMScenes
+  _sessions: null,
+  _sessionsWithScenes: null,
+  _sessionsWithQCMScenes: null,
+  reset() {
+    delete this._sessions;
+  },
+  getSessions(details, force = false) {
+    if (!this._sessions || force) {
+      this._sessions = Object.values(
+        details.reduce((acc, e) => {
+          if (!acc[e.SessionId]) {
+            acc[e.SessionId] = {};
+            acc[e.SessionId].SessionId = e.SessionId;
+            acc[e.SessionId].LearnerName = e.LearnerName;
+            acc[e.SessionId].actions = [];
+          }
+          acc[e.SessionId].actions.push(e);
+          return acc;
+        }, {})
+      );
     }
-}
+    return this._sessions;
+  },
+  getSessionsWithScenes(details, force = false) {
+    if (!this._sessionsWithcenes || force) {
+      if (!this._sessions) {
+        this.getSessions(details);
+      }
+      let sessions = [...this._sessions];
 
+      sessions.forEach((e) => {
+        let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
+          if (val.EventName == "Launch_ChangeWorld") {
+            acc.push(index);
+          }
+          return acc;
+        }, []);
+        e.scenes = [];
+        for (let i = 0; i < indexesOfChangeWorld.length; i++) {
+          let currentSceneActions = e.actions.slice(
+            indexesOfChangeWorld[i],
+            indexesOfChangeWorld[i + 1]
+          );
+          e.scenes.push(currentSceneActions);
+        }
+      });
+      this._sessionsWithcenes = sessions;
+    }
+    return this._sessionsWithcenes;
+  },
+  getSessionsWithQCMScenes(details, force = false) {
+    if (!this._sessionsWithQCMScenes || force) {
+      if (!this._sessions) {
+        this.getSessions(details);
+      }
+      let sessions = [...this._sessions];
+
+      sessions.forEach((e) => {
+        let indexesOfChangeWorld = e.actions.reduce((acc, val, index) => {
+          if (val.EventName == "Launch_ChangeWorld") {
+            acc.push(index);
+          }
+          return acc;
+        }, []);
+        e.scenes = [];
+        for (let i = 0; i < indexesOfChangeWorld.length; i++) {
+          let currentSceneActions = e.actions.slice(
+            indexesOfChangeWorld[i],
+            indexesOfChangeWorld[i + 1]
+          );
+          let currentSceneQCMs = currentSceneActions.filter(
+            (e) => e.EventName == "Launch_QcmAnswerClick"
+          );
+          if (currentSceneQCMs.length > 0) {
+            let currentScene = {
+              scene: currentSceneActions[0].SceneId,
+              zonesFound: currentSceneActions.filter(
+                (e) => e.EventName == "Launch_QcmAnswerClick"
+              ),
+              zonesScored: currentSceneActions.filter(
+                (e) => e.EventName == "Launch_WinStar"
+              ),
+              actions: currentSceneActions,
+              QCMs: currentSceneQCMs,
+            };
+            e.scenes.push(currentScene);
+          }
+        }
+      });
+      this._sessionsWithQCMScenes = sessions;
+    }
+    return this._sessionsWithQCMScenes;
+  },
+};
 
 async function extractScenes(details) {
-    //Get Scenes from csv object
-    let scenes = Object.values(details.reduce((acc, e) => {
-        if (e.SceneId && !acc[e.SceneId]) {
-            acc[e.SceneId] = { SceneId: e.SceneId, SceneName: e.SceneName }
-        }
-        return acc
-    }, {}))
+  //Get Scenes from csv object
+  let scenes = Object.values(
+    details.reduce((acc, e) => {
+      if (e.SceneId && !acc[e.SceneId]) {
+        acc[e.SceneId] = { SceneId: e.SceneId, SceneName: e.SceneName };
+      }
+      return acc;
+    }, {})
+  );
 
-    //Insert Scenes into SQLite Database
-    let insertion = []
-    scenes.forEach(singleScene => {
-        insertion.push(sqlWorker.send({
-            id: sqlWorker.id++,
-            action: "exec",
-            sql: "INSERT INTO Scenes (Id, Name) VALUES ($id, $name)",
-            params: { $id: singleScene.SceneId, $name: singleScene.SceneName }
-        }));
-    })
+  //Insert Scenes into SQLite Database
+  let insertion = [];
+  scenes.forEach((singleScene) => {
+    insertion.push(
+      sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql: "INSERT INTO Scenes (Id, Name) VALUES ($id, $name)",
+        params: { $id: singleScene.SceneId, $name: singleScene.SceneName },
+      })
+    );
+  });
 
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 async function extractQCM(details) {
-    //Separate all sessions by regrouping all data by sessionID
-    //Iterate through every session and separate scenes
-    let sessions = globalDataStruct.getSessionsWithQCMScenes(details)
+  //Separate all sessions by regrouping all data by sessionID
+  //Iterate through every session and separate scenes
+  let sessions = globalDataStruct.getSessionsWithQCMScenes(details);
 
-    //Now we have an array of sessions. We want an array of scenes in which we can see all QCM
-    let QCMbyScenes = sessions.reduce((acc, session) => {
-        session.scenes.forEach(scene => {
-            if (!acc[scene.scene]) {
-                acc[scene.scene] = {}
-            }
-            scene.QCMs.forEach(QCM => {
-                acc[scene.scene][QCM.TagId] = QCM.TagName
-            })
+  //Now we have an array of sessions. We want an array of scenes in which we can see all QCM
+  let QCMbyScenes = sessions.reduce((acc, session) => {
+    session.scenes.forEach((scene) => {
+      if (!acc[scene.scene]) {
+        acc[scene.scene] = {};
+      }
+      scene.QCMs.forEach((QCM) => {
+        acc[scene.scene][QCM.TagId] = QCM.TagName;
+      });
+    });
+    return acc;
+  }, {});
+
+  let insertion = [];
+  for (let [scene, QCMs] of Object.entries(QCMbyScenes)) {
+    for (let [QCMId, QCMName] of Object.entries(QCMs)) {
+      insertion.push(
+        sqlWorker.send({
+          id: sqlWorker.id++,
+          action: "exec",
+          sql:
+            "INSERT INTO QCM (Id, Name, SceneId) VALUES ($id, $name, $sceneId)",
+          params: { $id: QCMId, $name: QCMName, $sceneId: scene },
         })
-        return acc
-    }, {})
-
-    let insertion = []
-    for (let [scene, QCMs] of Object.entries(QCMbyScenes)) {
-        for (let [QCMId, QCMName] of Object.entries(QCMs)) {
-            insertion.push(sqlWorker.send({
-                id: sqlWorker.id++,
-                action: "exec",
-                sql: "INSERT INTO QCM (Id, Name, SceneId) VALUES ($id, $name, $sceneId)",
-                params: { $id: QCMId, $name: QCMName, $sceneId: scene }
-            }));
-        }
+      );
     }
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  }
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 
 async function extractUsers(details) {
-    let users = Object.values(details.reduce((acc, e) => {
-        if (e.LearnerName && !acc[e.LearnerName]) {
-            acc[e.LearnerName] = { LearnerName: e.LearnerName, LearnerId: e.LearnerId }
-        }
-        return acc
-    }, {}))
+  let users = Object.values(
+    details.reduce((acc, e) => {
+      if (e.LearnerName && !acc[e.LearnerName]) {
+        acc[e.LearnerName] = {
+          LearnerName: e.LearnerName,
+          LearnerId: e.LearnerId,
+        };
+      }
+      return acc;
+    }, {})
+  );
 
-    //Insert Scenes into SQLite Database
-    let insertion = []
-    users.forEach(singleUser => {
-        insertion.push(sqlWorker.send({
-            id: sqlWorker.id++,
-            action: "exec",
-            sql: "INSERT INTO Users (Id) VALUES ($id)",
-            params: { $id: singleUser.LearnerName }
-        }));
-    })
+  //Insert Scenes into SQLite Database
+  let insertion = [];
+  users.forEach((singleUser) => {
+    insertion.push(
+      sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql: "INSERT INTO Users (Id) VALUES ($id)",
+        params: { $id: singleUser.LearnerName },
+      })
+    );
+  });
 
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 async function extractSessions(details) {
-    //Separate all sessions by regrouping all data by sessionID
-    let sessions = globalDataStruct.getSessions(details)
-    //Insert Scenes into SQLite Database
-    let insertion = []
+  //Separate all sessions by regrouping all data by sessionID
+  let sessions = globalDataStruct.getSessions(details);
+  //Insert Scenes into SQLite Database
+  let insertion = [];
 
-    sessions.forEach(singleSession => {
-        insertion.push(sqlWorker.send({
-            id: sqlWorker.id++,
-            action: "exec",
-            sql: "INSERT INTO Sessions (Id, UserId, StartTime, EndTime) VALUES ($id, $userId, $startTime, $endTime)",
-            params: { $id: singleSession.SessionId, $userId: singleSession.LearnerName, $startTime: singleSession.actions[0].EventTime.getTime(), $endTime: singleSession.actions.at(-1).EventTime.getTime() }
-        }));
-    })
+  sessions.forEach((singleSession) => {
+    insertion.push(
+      sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql:
+          "INSERT INTO Sessions (Id, UserId, StartTime, EndTime) VALUES ($id, $userId, $startTime, $endTime)",
+        params: {
+          $id: singleSession.SessionId,
+          $userId: singleSession.LearnerName,
+          $startTime: singleSession.actions[0].EventTime.getTime(),
+          $endTime: singleSession.actions.at(-1).EventTime.getTime(),
+        },
+      })
+    );
+  });
 
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 async function extractQCMAnswers(details) {
-    //Separate all sessions by regrouping all data by sessionID
-    //Iterate through every session and separate scenes
-    let sessions = globalDataStruct.getSessionsWithQCMScenes(details)
+  //Separate all sessions by regrouping all data by sessionID
+  //Iterate through every session and separate scenes
+  let sessions = globalDataStruct.getSessionsWithQCMScenes(details);
 
-    let insertion = []
-    sessions.forEach(session => {
-        session.scenes.forEach(scene => {
-            scene.zonesScored.forEach(zoneScored => {
-                let zone = scene.zonesFound.find(e => e.TagId == zoneScored.TagId)
-                if (zone) zone.isCorrect = true
-            })
-            delete scene.zonesScored
-            scene.zonesFound.forEach(zoneFound => {
-                insertion.push(sqlWorker.send({
-                    id: sqlWorker.id++,
-                    action: "exec",
-                    sql: "INSERT INTO QCMAnswers (TagId, SessionId, Timestamp, IsCorrect, Answer) VALUES ($tagId, $sessionId, $timestamp, $isCorrect, $answer)",
-                    params: { $tagId: zoneFound.TagId, $sessionId: session.SessionId, $timestamp: zoneFound.EventTime.getTime(), $isCorrect: zoneFound.isCorrect ? 1 : 0, $answer: zoneFound.Answer }
-                }));
-            })
-        })
-    })
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  let insertion = [];
+  sessions.forEach((session) => {
+    session.scenes.forEach((scene) => {
+      scene.zonesScored.forEach((zoneScored) => {
+        let zone = scene.zonesFound.find((e) => e.TagId == zoneScored.TagId);
+        if (zone) zone.isCorrect = true;
+      });
+      delete scene.zonesScored;
+      scene.zonesFound.forEach((zoneFound) => {
+        insertion.push(
+          sqlWorker.send({
+            id: sqlWorker.id++,
+            action: "exec",
+            sql:
+              "INSERT INTO QCMAnswers (TagId, SessionId, Timestamp, IsCorrect, Answer) VALUES ($tagId, $sessionId, $timestamp, $isCorrect, $answer)",
+            params: {
+              $tagId: zoneFound.TagId,
+              $sessionId: session.SessionId,
+              $timestamp: zoneFound.EventTime.getTime(),
+              $isCorrect: zoneFound.isCorrect ? 1 : 0,
+              $answer: zoneFound.Answer,
+            },
+          })
+        );
+      });
+    });
+  });
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 
 async function extractSceneVisits(details) {
-    let insertion = []
-    globalDataStruct.getSessionsWithScenes(details).forEach(session => {
-        session.scenes.forEach(scene => {
-            insertion.push(sqlWorker.send({
-                id: sqlWorker.id++,
-                action: "exec",
-                sql: "INSERT INTO SceneVisit (SessionId, EnterTime, SceneId) VALUES ($sessionId, $enterTime, $sceneId)",
-                params: { $sessionId: session.SessionId, $enterTime: scene[0].EventTime.getTime(), $sceneId: scene[0].SceneId }
-            }));
+  let insertion = [];
+  globalDataStruct.getSessionsWithScenes(details).forEach((session) => {
+    session.scenes.forEach((scene) => {
+      insertion.push(
+        sqlWorker.send({
+          id: sqlWorker.id++,
+          action: "exec",
+          sql:
+            "INSERT INTO SceneVisit (SessionId, EnterTime, SceneId) VALUES ($sessionId, $enterTime, $sceneId)",
+          params: {
+            $sessionId: session.SessionId,
+            $enterTime: scene[0].EventTime.getTime(),
+            $sceneId: scene[0].SceneId,
+          },
         })
-    })
+      );
+    });
+  });
 
-    Promise.all(insertion).catch(err => {
-        throw err;
-    })
+  Promise.all(insertion).catch((err) => {
+    throw err;
+  });
 
-    await Promise.all(insertion)
+  await Promise.all(insertion);
 }
 
 async function test() {
-    //List All Tables
-    let tables = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM sqlite_master WHERE type='table';`,
-    }))
-    console.log("tables", tables.results[0].columns)
-    console.table(tables.results[0].values, [0, 1, 2])
+  //List All Tables
+  let tables = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM sqlite_master WHERE type='table';`,
+  });
+  console.log("tables", tables.results[0].columns);
+  console.table(tables.results[0].values, [0, 1, 2]);
 
-    let scenes = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM Scenes;`,
-    }))
-    console.log("scenes", scenes.results[0].columns)
-    console.table(scenes.results[0].values)
+  let scenes = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM Scenes;`,
+  });
+  console.log("scenes", scenes.results[0].columns);
+  console.table(scenes.results[0].values);
 
-    let users = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM Users;`,
-    }))
-    console.log("users", users.results[0].columns)
-    console.table(users.results[0].values)
+  let users = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM Users;`,
+  });
+  console.log("users", users.results[0].columns);
+  console.table(users.results[0].values);
 
+  let sessions = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM Sessions;`,
+  });
 
-    let sessions = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM Sessions;`,
-    }))
+  console.log("sessions", sessions.results[0].columns);
+  console.table(sessions.results[0].values);
 
-    console.log("sessions", sessions.results[0].columns)
-    console.table(sessions.results[0].values)
+  let QCM = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM QCM;`,
+  });
+  console.log("QCM", QCM.results[0].columns);
+  console.table(QCM.results[0].values);
 
+  let QCMAnswers = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM QCMAnswers;`,
+  });
+  console.log("QCMAnswers", QCMAnswers.results[0].columns);
+  console.table(QCMAnswers.results[0].values);
 
-    let QCM = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM QCM;`,
-    }))
-    console.log("QCM", QCM.results[0].columns)
-    console.table(QCM.results[0].values)
-
-    let QCMAnswers = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM QCMAnswers;`,
-    }))
-    console.log("QCMAnswers", QCMAnswers.results[0].columns)
-    console.table(QCMAnswers.results[0].values)
-
-    let SceneVisit = (await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql:
-            `SELECT * FROM SceneVisit;`,
-    }))
-    console.log("SceneVisit " + SceneVisit.results[0].values.length, SceneVisit.results[0].columns)
-    console.table(SceneVisit.results[0].values)
-}
-
-async function debug(request) {
-    let output = await sqlWorker.send({
-        id: sqlWorker.id++,
-        action: "exec",
-        sql: request
-    })
-    if (output.error) {
-        throw output.error;
-    }
-    console.log("output", output.results[0].columns)
-    console.table(output.results[0].values)
-    return output
+  let SceneVisit = await sqlWorker.send({
+    id: sqlWorker.id++,
+    action: "exec",
+    sql: `SELECT * FROM SceneVisit;`,
+  });
+  console.log(
+    "SceneVisit " + SceneVisit.results[0].values.length,
+    SceneVisit.results[0].columns
+  );
+  console.table(SceneVisit.results[0].values);
 }

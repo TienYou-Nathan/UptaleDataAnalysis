@@ -41,7 +41,13 @@
     </div>
 
     <div id="container" v-if="display == 'SQL'">
-      <SQLPlayground :data="scorePerPathData" @SQLRequest="sqlDebug" />
+      <SQLPlayground
+        :data="scorePerPathData"
+        @SQLRequest="sqlDebug"
+        :downloadData="sqlDebugDataObject"
+        :columns="sqlDebugData.columns"
+        :values="sqlDebugData.values"
+      />
     </div>
   </div>
 </template>
@@ -74,6 +80,7 @@ import {
   updateUserGroup,
   updateUser,
   deleteUserGroup,
+  debug,
 } from "./sqlRequests";
 
 export default {
@@ -100,6 +107,7 @@ export default {
       isLoading: 0,
       //option for computed paths
       merge_themes: false,
+      sqlDebugData: { columns: [], values: [] },
     };
   },
   setup() {
@@ -235,12 +243,9 @@ export default {
       download.click();
     },
 
-    sqlDebug(request) {
-      this.sqlWorker.send({
-        id: this.sqlWorker.id++,
-        action: "debug",
-        sql: request,
-      });
+    async sqlDebug(request) {
+      ({ data: this.sqlDebugData, dataObject: this.sqlDebugDataObject } =
+        await debug(this.sqlWorker, request));
     },
   },
 };

@@ -12,6 +12,7 @@
           :value="group.Color"
           @change="colorchange($event, group.Id)"
         />
+        <br />
         <input
           type="button"
           @click="deleteUserGroup(group.Id)"
@@ -56,7 +57,9 @@ export default {
       });
     },
     deleteUserGroup(groupId) {
+      // if (confirm("Are you sure you want to delete this group?")) {
       this.$emit("deleteUserGroup", { id: groupId });
+      // }
     },
     updateUser(userId, groupId) {
       this.$emit("updateUser", { id: userId, userGroupId: groupId });

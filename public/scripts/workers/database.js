@@ -1,6 +1,6 @@
-self.importScripts("workerManager.js");
+self.importScripts("WorkerManager.js");
 const SQL = new Worker("worker.sql-wasm.js");
-const sqlWorker = workerManager(SQL);
+const sqlWorker = new WorkerManager(SQL);
 
 self.importScripts("../functions/cleanCSVFile.js");
 self.importScripts("../functions/extractCSVData.js");

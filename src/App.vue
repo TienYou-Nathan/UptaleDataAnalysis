@@ -63,7 +63,7 @@ import { sidebarWidth } from "@/components/Sidebar/state";
 
 import Header from "./components/Header/Header.vue";
 
-import { workerManager } from "./workerManager";
+import { WorkerManager } from "./WorkerManager";
 
 import {
   getScenes,
@@ -95,8 +95,7 @@ export default {
   data() {
     return {
       title: "VR@COVID Paths Analysis",
-      sqlWorker: workerManager,
-      databaseInsertion: workerManager,
+      sqlWorker: WorkerManager,
       computeWorker: Worker,
       serializedDatabase: String,
       //page to show
@@ -127,7 +126,7 @@ export default {
 
     async computeData(files) {
       this.isLoading = 1;
-      this.sqlWorker = workerManager(
+      this.sqlWorker = new WorkerManager(
         new Worker("/scripts/workers/database.js")
       );
       if (files.database) {

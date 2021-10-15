@@ -1,3 +1,6 @@
+//This file contains all functions related to import data from the CSV file to the database
+
+
 async function initializeDB() {
     tableCreation = [];
     scenesCreation = [];

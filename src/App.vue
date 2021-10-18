@@ -14,6 +14,7 @@
       @downloadDatabase="downloadDatabase"
       :isLoading="isLoading"
       :progress="progress"
+      :progressMessage="progressMessage"
     />
 
     <div v-if="display == 'categories'">
@@ -106,6 +107,7 @@ export default {
       themes: [],
       isLoading: 0,
       progress: 0,
+      progressMessage: "",
       //option for computed paths
       merge_themes: false,
       sqlDebugData: { columns: [], values: [] },
@@ -131,6 +133,13 @@ export default {
       this.sqlWorker = new WorkerManager(
         new Worker("/scripts/workers/database.js")
       );
+
+      this.sqlWorker.onProgress = (data) => {
+        console.log(data);
+        this.progress = data.progress;
+        this.progressMessage = data.message;
+      };
+
       if (files.database) {
         await this.sqlWorker.send({
           id: this.sqlWorker.id++,

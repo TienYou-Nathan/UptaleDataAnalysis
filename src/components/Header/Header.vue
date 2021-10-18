@@ -6,6 +6,7 @@
       max="100"
       :value="progress"
     ></progress>
+    <span id="progressMessage">{{ this.progressMessage }}</span>
     <h1>{{ title }}</h1>
     <FileLoader
       @filesLoaded="filesLoaded"
@@ -29,6 +30,7 @@ export default {
   },
   props: {
     progress: 0,
+    progressMessage: "",
     serializedDatabase: [],
     title: {
       type: String,
@@ -53,10 +55,40 @@ header {
   align-items: center;
   margin-bottom: 20px;
 }
+
+#progressMessage {
+  position: absolute;
+  text-align: center;
+  width: calc(100% - 2vmin);
+}
+
 #progress {
   position: absolute;
   left: 0;
-  width: 100%;
+  width: calc(100%);
   top: 0;
+  appearance: none;
+  height: 10px;
+  border: 0;
+}
+
+#progress::-moz-progress-bar {
+  background-image: -webkit-linear-gradient(
+    -45deg,
+    transparent 33%,
+    rgba(0, 0, 0, 0.3) 33%,
+    rgba(0, 0, 0, 0.3) 66%,
+    transparent 33%
+  );
+  background-size: 35px 20px, 100% 100%, 100% 100%;
+  background-color: red;
+
+  animation: animate-stripes 2s linear infinite;
+}
+
+@keyframes animate-stripes {
+  100% {
+    background-position: 100px 0;
+  }
 }
 </style>

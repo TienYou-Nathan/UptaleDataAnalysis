@@ -7,8 +7,13 @@ export class WorkerManager {
 
         this.worker.onmessage = data => {
             //resolve promise
-            this._queue[data.data.id].resolve(data.data)
-            delete this._queue[data.data.id]
+            if (data.data.type == "progress") {
+                this.onProgress(data.data)
+            } else {
+                this._queue[data.data.id].resolve(data.data)
+                delete this._queue[data.data.id]
+            }
+
         }
 
         this.worker.onerror = data => {

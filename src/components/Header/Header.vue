@@ -6,7 +6,9 @@
       max="100"
       :value="progress"
     ></progress>
-    <span id="progressMessage">{{ this.progressMessage }}</span>
+    <pre v-if="progress > 0 && progress < 100" id="progressMessage">{{
+      this.progressMessage
+    }}</pre>
     <h1>{{ title }}</h1>
     <FileLoader
       @filesLoaded="filesLoaded"

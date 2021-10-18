@@ -15,20 +15,24 @@
         {{ column }}
       </th>
     </tr>
-    <tr v-for="values in values" :key="values">
-      <td v-for="value in values" :key="value">{{ value }}</td>
+    <tr v-for="row in reducedValues" :key="row">
+      <td v-for="cell in row" :key="cell">{{ cell }}</td>
     </tr>
   </table>
 </template>
 
 <script>
+import { wait } from "../../utilities";
+
 export default {
   name: "SQLPlayground",
-  emits: ["SQLRequest"],
+  emits: ["SQLRequest", "progress"],
   components: {},
   data() {
     return {
       downloadDataURL: null,
+      reducedValues: [],
+      reducedInterval: 0,
     };
   },
   watch: {
@@ -38,6 +42,9 @@ export default {
         new Blob([d3.csvFormat(this.downloadData)], { type: "text/csv" })
       );
     },
+    values() {
+      this.showData();
+    },
   },
   props: {
     downloadData: {},
@@ -45,13 +52,39 @@ export default {
     values: Array,
   },
   setup() {},
-  created() {},
+  created() {
+    this.showData();
+  },
   computed() {},
   methods: {
     keyup(e) {
       if (e.ctrlKey && e.code == "Enter") {
         this.$emit("SQLRequest", e.target.value);
       }
+    },
+    async showData() {
+      clearInterval(this.reducedInterval);
+      this.$emit("progress", {
+        progress: 100,
+      });
+      await wait(15);
+      this.reducedValues = [];
+      let valuesCopy = [...this.values];
+      let totalLength = this.values.length;
+      let currentLength = 0;
+      this.reducedInterval = setInterval(() => {
+        let temp = valuesCopy.splice(25);
+        this.reducedValues = [...this.reducedValues, ...valuesCopy];
+        valuesCopy = temp;
+        currentLength = this.reducedValues.length;
+        this.$emit("progress", {
+          progress: (currentLength * 100) / totalLength,
+          message: `Displaying results\n${currentLength}/${totalLength}\nCSV ready`,
+        });
+        if (valuesCopy.length == 0) {
+          clearInterval(this.reducedInterval);
+        }
+      }, 15);
     },
   },
 };

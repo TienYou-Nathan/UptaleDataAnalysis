@@ -44,6 +44,7 @@
     <div id="container" v-if="display == 'SQL'">
       <SQLPlayground
         @SQLRequest="sqlDebug"
+        @progress="changeProgress"
         :downloadData="sqlDebugDataObject"
         :columns="sqlDebugData.columns"
         :values="sqlDebugData.values"
@@ -105,6 +106,8 @@ export default {
       scenes: [],
       categories: [],
       themes: [],
+      users: [],
+      usersGroups: [],
       isLoading: 0,
       progress: 0,
       progressMessage: "",
@@ -134,11 +137,7 @@ export default {
         new Worker("/scripts/workers/database.js")
       );
 
-      this.sqlWorker.onProgress = (data) => {
-        console.log(data);
-        this.progress = data.progress;
-        this.progressMessage = data.message;
-      };
+      this.sqlWorker.onProgress = this.changeProgress;
 
       if (files.database) {
         await this.sqlWorker.send({
@@ -256,6 +255,11 @@ export default {
     async sqlDebug(request) {
       ({ data: this.sqlDebugData, dataObject: this.sqlDebugDataObject } =
         await debug(this.sqlWorker, request));
+    },
+
+    changeProgress(data) {
+      this.progress = data.progress;
+      this.progressMessage = data.message;
     },
   },
 };

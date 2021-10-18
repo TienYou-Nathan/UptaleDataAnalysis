@@ -23,7 +23,7 @@ onmessage = async (e) => {
     await extractSceneVisits(e.data.files.detail);
     await extractTopicClicks(e.data.files.detail)
 
-    await test()
+    //await test()
   } else if (e.data.action == "export") {
     message.results = (
       await sqlWorker.send({

@@ -40,14 +40,12 @@ export default {
     },
   },
   props: {
-    downloadData: [],
-    columns: [],
-    values: [],
+    downloadData: {},
+    columns: Array,
+    values: Array,
   },
   setup() {},
-  created() {
-    console.log(this.downloadDataURL);
-  },
+  created() {},
   computed() {},
   methods: {
     keyup(e) {

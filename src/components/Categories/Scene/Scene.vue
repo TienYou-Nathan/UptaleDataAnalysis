@@ -48,18 +48,6 @@ export default {
     scene: {
       type: Object,
     },
-    mapCategories: {
-      type: Map,
-      default: [],
-    },
-    mapThemes: {
-      type: Map,
-      default: [],
-    },
-    mapScenes: {
-      type: Map,
-      default: [],
-    },
   },
   methods: {
     dragEnter(e) {

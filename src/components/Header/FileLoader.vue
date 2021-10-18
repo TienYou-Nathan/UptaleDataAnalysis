@@ -37,15 +37,7 @@ export default {
     return {
       currentWindow: "",
       isLoadingSerializedDatabase: 0,
-    };
-  },
-  props: {
-    isLoading: Number,
-    perUserAnswers: Object,
-    serializedDatabase: [],
-    fields: {
-      type: Array,
-      default: [
+      fields: [
         {
           name: "detail",
           label: "Select detail data file file here",
@@ -59,9 +51,16 @@ export default {
           format: "sql",
         },
       ],
-    },
+    };
   },
-  emits: ["filesLoaded", "updateSerializedDatabase"],
+  props: {
+    isLoading: Number,
+    perUserAnswers: Object,
+    serializedDatabase: [],
+    progress: 0,
+  },
+  emits: ["filesLoaded", "updateSerializedDatabase", "downloadDatabase"],
+  created() {},
   methods: {
     load_file: async function (file) {
       function readFileAsync(file) {

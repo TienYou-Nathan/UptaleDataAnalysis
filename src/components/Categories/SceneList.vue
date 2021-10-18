@@ -52,7 +52,13 @@ import SceneProperty from "./Scene/SceneProperty.vue";
 
 export default {
   name: "SceneList",
-  emits: ["addCategory", "addTheme"],
+  emits: [
+    "addCategory",
+    "addTheme",
+    "updateCategory",
+    "updateTheme",
+    "updateScene",
+  ],
   components: {
     Scene,
     SceneProperty,

@@ -42,7 +42,7 @@
 <script>
 export default {
   name: "UsersSetup",
-  emits: ["addUserGroup", "updateUser", "updateUserGroup"],
+  emits: ["addUserGroup", "updateUser", "updateUserGroup", "deleteUserGroup"],
   components: {},
   props: {
     users: Array,

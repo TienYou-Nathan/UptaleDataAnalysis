@@ -10,10 +10,10 @@
     <Header
       id="Header"
       title="VR@COVID Paths Analysis"
-      :fields="fields"
       @filesLoaded="computeData"
       @downloadDatabase="downloadDatabase"
       :isLoading="isLoading"
+      :progress="progress"
     />
 
     <div v-if="display == 'categories'">
@@ -42,7 +42,6 @@
 
     <div id="container" v-if="display == 'SQL'">
       <SQLPlayground
-        :data="scorePerPathData"
         @SQLRequest="sqlDebug"
         :downloadData="sqlDebugDataObject"
         :columns="sqlDebugData.columns"
@@ -97,13 +96,16 @@ export default {
       title: "VR@COVID Paths Analysis",
       sqlWorker: WorkerManager,
       computeWorker: Worker,
-      serializedDatabase: String,
+      serializedDatabase: "",
+      serializedDatabaseURL: "",
+      sqlDebugDataObject: {},
       //page to show
       display: "SQL",
       scenes: [],
       categories: [],
       themes: [],
       isLoading: 0,
+      progress: 0,
       //option for computed paths
       merge_themes: false,
       sqlDebugData: { columns: [], values: [] },

@@ -48,7 +48,10 @@ export default {
     users: Array,
     usersGroups: Array,
   },
-  created() {},
+  created() {
+    console.log(this.users)
+    console.log(this.usersGroups)
+  },
   methods: {
     addUserGroup(e) {
       this.$emit("addUserGroup", {

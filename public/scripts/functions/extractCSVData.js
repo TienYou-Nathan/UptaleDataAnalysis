@@ -69,7 +69,8 @@ async function initializeDB() {
         sql: `CREATE TABLE IF NOT EXISTS UsersGroups (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT,
-                Color TEXT
+                Color TEXT,
+                Type TEXT
             )`,
     });
 

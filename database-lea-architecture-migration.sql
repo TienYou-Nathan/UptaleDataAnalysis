@@ -9,6 +9,8 @@ SELECT Id,
 FROM _Users_old;
 COMMIT;
 PRAGMA foreign_keys = on;
+ALTER TABLE UsersGroups
+ADD Type;
 CREATE TABLE IF NOT EXISTS UserGroupAssociation (
     UserId TEXT,
     UserGroupId INTEGER,

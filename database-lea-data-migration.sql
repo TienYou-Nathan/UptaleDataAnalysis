@@ -140,3 +140,12 @@ WHERE (UserId, UserGroupId) IN (
             LEFT JOIN UsersGroups ON UsersGroups.Id = UserGroupAssociation.UserGroupId
         WHERE UsersGroups.Name = "M1 IFMK Bordeaux"
     );
+DELETE FROM UsersGroups
+WHERE Name = "M1 EUK CVL"
+    OR Name = "M2 IFMK Bordeaux"
+    OR Name = "M1 IFMK Poitiers"
+    OR Name = "M2 IFMK Poitiers"
+    OR Name = "M2 EUK CVL"
+    OR Name = "M2 IFMK Croix Rouge Limoges"
+    OR Name = "M1 IFMK Croix Rouge Limoges"
+    OR Name = "M1 IFMK Bordeaux";

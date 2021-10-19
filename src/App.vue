@@ -108,6 +108,7 @@ export default {
       themes: [],
       users: [],
       usersGroups: [],
+      focusedGroupType:"Expertise",
       isLoading: 0,
       progress: 0,
       progressMessage: "",
@@ -160,7 +161,7 @@ export default {
       this.scenes = await getScenes(this.sqlWorker);
       this.categories = await getCategories(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       this.isLoading = 2;
       this.isLoading = 0;
@@ -213,14 +214,14 @@ export default {
       this.isLoading = 1;
       await updateUserGroup(this.sqlWorker, userGroup);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
       this.isLoading = 0;
     },
 
     async updateUser(user) {
       this.isLoading = 1;
       await updateUser(this.sqlWorker, user);
-      this.users = await getUsers(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
       this.isLoading = 0;
     },
     async deleteUserGroup(groupId) {
@@ -230,7 +231,7 @@ export default {
       console.log("getUsersGroups");
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       console.log("getUsers");
-      this.users = await getUsers(this.sqlWorker);
+      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
       this.isLoading = 0;
     },
     async getSerializedDatabase() {

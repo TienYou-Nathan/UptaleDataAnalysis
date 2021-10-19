@@ -79,10 +79,21 @@ async function initializeDB() {
         sql: `CREATE TABLE IF NOT EXISTS Users (
                 Id TEXT PRIMARY KEY,
                 Name TEXT,
-                UserGroupId INTEGER,
-                FOREIGN KEY (UserGroupId) REFERENCES UsersGroups(Id) ON DELETE CASCADE
             )`,
     });
+
+    await sqlWorker.send({
+        id: sqlWorker.id++,
+        action: "exec",
+        sql: `CREATE TABLE IF NOT EXISTS UserGroupAssociation (
+            UserId TEXT,
+            UserGroupId INTEGER,
+            FOREIGN KEY(UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+            FOREIGN KEY(UserGroupId) REFERENCES UsersGroups(Id) ON DELETE CASCADE,
+            PRIMARY KEY(UserId, UserGroupId)
+        );`,
+    });
+
     await sqlWorker.send({
         id: sqlWorker.id++,
         action: "exec",
@@ -94,6 +105,8 @@ async function initializeDB() {
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
                 )`,
     });
+
+    
 
     await sqlWorker.send({
         id: sqlWorker.id++,

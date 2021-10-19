@@ -41,7 +41,7 @@
       />
     </div>
 
-    <div id="container" v-if="display == 'SQL'">
+    <div id="container" :hidden="!(display == 'SQL')">
       <SQLPlayground
         @SQLRequest="sqlDebug"
         @progress="changeProgress"

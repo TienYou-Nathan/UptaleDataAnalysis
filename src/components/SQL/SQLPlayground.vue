@@ -51,11 +51,12 @@ export default {
     columns: Array,
     values: Array,
   },
-  setup() {},
-  created() {
-    this.showData();
+  beforeDestroy() {
+    clearInterval(this.reducedInterval);
+    this.$emit("progress", {
+      progress: 100,
+    });
   },
-  computed() {},
   methods: {
     keyup(e) {
       if (e.ctrlKey && e.code == "Enter") {
@@ -72,8 +73,12 @@ export default {
       let valuesCopy = [...this.values];
       let totalLength = this.values.length;
       let currentLength = 0;
+
+      let delay = 15;
+      let batchSize = 25;
+
       this.reducedInterval = setInterval(() => {
-        let temp = valuesCopy.splice(25);
+        let temp = valuesCopy.splice(batchSize);
         this.reducedValues = [...this.reducedValues, ...valuesCopy];
         valuesCopy = temp;
         currentLength = this.reducedValues.length;
@@ -81,10 +86,11 @@ export default {
           progress: (currentLength * 100) / totalLength,
           message: `Displaying results\n${currentLength}/${totalLength}\nCSV ready`,
         });
+
         if (valuesCopy.length == 0) {
           clearInterval(this.reducedInterval);
         }
-      }, 15);
+      }, delay);
     },
   },
 };

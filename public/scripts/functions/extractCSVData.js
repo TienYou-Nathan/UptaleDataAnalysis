@@ -379,7 +379,7 @@ async function extractSessions(details) {
                     $id: singleSession.SessionId,
                     $userId: singleSession.LearnerName,
                     $startTime: singleSession.actions[0].EventTime.getTime(),
-                    $endTime: singleSession.actions.at(-1).EventTime.getTime(),
+                    $endTime: singleSession.actions[singleSession.actions.length-1].EventTime.getTime(),
                 },
             })
         );

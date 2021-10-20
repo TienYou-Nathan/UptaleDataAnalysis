@@ -9,7 +9,7 @@
   <div id="nav" :style="{ 'margin-left': sidebarWidth }">
     <Header
       id="Header"
-      title="VR@COVID Paths Analysis"
+      title=""
       @filesLoaded="computeData"
       @downloadDatabase="downloadDatabase"
       :isLoading="isLoading"
@@ -27,6 +27,8 @@
         @updateCategory="updateCategory"
         @updateTheme="updateTheme"
         @updateScene="updateScene"
+        @deleteCategory="deleteCategory"
+        @deleteTheme="deleteTheme"
       />
     </div>
 
@@ -83,6 +85,8 @@ import {
   updateUserGroup,
   updateUser,
   deleteUserGroup,
+  deleteCategory,
+  deleteTheme,
   debug,
 } from "./sqlRequests";
 
@@ -228,12 +232,23 @@ export default {
     },
     async deleteUserGroup(groupId) {
       this.isLoading = 1;
-      console.log("deleteUserGroup");
       await deleteUserGroup(this.sqlWorker, groupId);
-      console.log("getUsersGroups");
       this.usersGroups = await getUsersGroups(this.sqlWorker);
-      console.log("getUsers");
       this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.isLoading = 0;
+    },
+    async deleteCategory(category) {
+      this.isLoading = 1;
+      await deleteCategory(this.sqlWorker, category);
+      this.scenes = await getScenes(this.sqlWorker);
+      this.categories = await getCategories(this.sqlWorker);
+      this.isLoading = 0;
+    },
+    async deleteTheme(theme) {
+      this.isLoading = 1;
+      await deleteTheme(this.sqlWorker, theme);
+      this.scenes = await getScenes(this.sqlWorker);
+      this.themes = await getThemes(this.sqlWorker);
       this.isLoading = 0;
     },
     async getSerializedDatabase() {

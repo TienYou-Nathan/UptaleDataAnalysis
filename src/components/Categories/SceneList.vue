@@ -23,7 +23,7 @@
           :color="category.Color"
           :persistent="true"
           :type="'category'"
-          @deleteProperty="removeProperty"
+          @deleteProperty="$emit('deleteCategory', $event)"
           @updateProperty="$emit('updateCategory', $event)"
         />
       </div>
@@ -38,7 +38,7 @@
           :color="theme.Color"
           :persistent="true"
           :type="'theme'"
-          @deleteProperty="removeProperty"
+          @deleteProperty="$emit('deleteTheme', $event)"
           @updateProperty="$emit('updateTheme', $event)"
         />
       </div>
@@ -58,6 +58,8 @@ export default {
     "updateCategory",
     "updateTheme",
     "updateScene",
+    "deleteCategory",
+    "deleteTheme",
   ],
   components: {
     Scene,
@@ -79,7 +81,6 @@ export default {
   },
   created() {},
   methods: {
-    removeProperty() {},
     addCategory(e) {
       e.preventDefault();
       this.$emit("addCategory", {

@@ -66,6 +66,14 @@ export async function updateCategory(sqlWorker, category) {
   );
 }
 
+export async function deleteCategory(sqlWorker, category) {
+  return requestSQL(
+    sqlWorker,
+    `DELETE FROM Categories WHERE Id = $id`,
+    { $id: category.id }
+  );
+}
+
 export async function getThemes(sqlWorker) {
   return requestSQL(sqlWorker, `SELECT Id, Name, Color FROM Themes`);
 }
@@ -83,6 +91,14 @@ export async function updateTheme(sqlWorker, theme) {
     sqlWorker,
     `UPDATE Themes SET Color = $color WHERE Id = $id`,
     { $id: theme.id, $color: theme.color }
+  );
+}
+
+export async function deleteTheme(sqlWorker, theme) {
+  return requestSQL(
+    sqlWorker,
+    `DELETE FROM Themes WHERE Id = $id`,
+    { $id: theme.id }
   );
 }
 

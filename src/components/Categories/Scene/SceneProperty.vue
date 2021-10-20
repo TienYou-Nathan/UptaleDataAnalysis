@@ -64,7 +64,11 @@ export default {
         id: this.id,
       });
     },
-    deleteProperty() {},
+    deleteProperty() {
+      this.$emit("deleteProperty", {
+        id: this.id,
+      });
+    },
   },
 };
 </script>

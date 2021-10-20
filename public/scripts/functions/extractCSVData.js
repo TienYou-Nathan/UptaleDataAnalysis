@@ -89,8 +89,8 @@ async function initializeDB() {
         sql: `CREATE TABLE IF NOT EXISTS UserGroupAssociation (
             UserId TEXT,
             UserGroupId INTEGER,
-            FOREIGN KEY(UserId) REFERENCES Users(Id) ON DELETE CASCADE,
-            FOREIGN KEY(UserGroupId) REFERENCES UsersGroups(Id) ON DELETE CASCADE,
+            FOREIGN KEY(UserId) REFERENCES Users(Id),
+            FOREIGN KEY(UserGroupId) REFERENCES UsersGroups(Id),
             PRIMARY KEY(UserId, UserGroupId)
         );`,
     });
@@ -107,7 +107,7 @@ async function initializeDB() {
                 )`,
     });
 
-    
+
 
     await sqlWorker.send({
         id: sqlWorker.id++,
@@ -393,7 +393,7 @@ async function extractSessions(details) {
                     $id: singleSession.SessionId,
                     $userId: singleSession.LearnerName,
                     $startTime: singleSession.actions[0].EventTime.getTime(),
-                    $endTime: singleSession.actions[singleSession.actions.length-1].EventTime.getTime(),
+                    $endTime: singleSession.actions[singleSession.actions.length - 1].EventTime.getTime(),
                 },
             })
         );

@@ -15,10 +15,10 @@ export default {
   <div class="sidebar" :style="{ width: sidebarWidth }">
     <h1>
       <span v-if="collapsed">
-        <div>V</div>
-        <div>S</div>
+        <div>U</div>
+        <div>A</div>
       </span>
-      <span v-else>Vue Sidebar</span>
+      <span v-else>Uptale Analysis</span>
     </h1>
     <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'categories')"

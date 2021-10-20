@@ -1,10 +1,10 @@
 <template>
   <textarea
     id="area"
+    ref="area"
     autonomplete="on"
     autocorrect="off"
     spellcheck="off"
-    @keyup="keyup"
   ></textarea>
   <a v-if="downloadDataURL" :href="downloadDataURL" download="result.csv"
     >Download Results</a
@@ -33,6 +33,7 @@ export default {
       downloadDataURL: null,
       reducedValues: [],
       reducedInterval: 0,
+      codeMirror: null,
     };
   },
   watch: {
@@ -51,17 +52,25 @@ export default {
     columns: Array,
     values: Array,
   },
-  beforeDestroy() {
-    clearInterval(this.reducedInterval);
-    this.$emit("progress", {
-      progress: 100,
+  mounted() {
+    this.codeMirror = CodeMirror.fromTextArea(this.$refs.area, {
+      lineNumbers: true,
+      mode: "text/x-mysql",
+      viewportMargin: Infinity,
+      indentWithTabs: true,
+      smartIndent: true,
+      lineNumbers: true,
+      matchBrackets: true,
+      autofocus: true,
+      extraKeys: {
+        "Ctrl-Enter": this.execEditorContents,
+        // "Ctrl-S": savedb,
+      },
     });
   },
   methods: {
-    keyup(e) {
-      if (e.ctrlKey && e.code == "Enter") {
-        this.$emit("SQLRequest", e.target.value);
-      }
+    execEditorContents() {
+      this.$emit("SQLRequest", this.codeMirror.getValue() + ";");
     },
     async showData() {
       clearInterval(this.reducedInterval);
@@ -104,5 +113,10 @@ export default {
 th,
 td {
   border: 1px solid black;
+}
+</style>
+<style>
+.CodeMirror {
+  text-align: left;
 }
 </style>

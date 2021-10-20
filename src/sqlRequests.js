@@ -98,21 +98,22 @@ export async function updateScene(sqlWorker, scene) {
   );
 }
 
-export async function getUsers(sqlWorker, groupType = "Expertise") {
+export async function getUsers(sqlWorker, groupType) {
   return requestSQL(
     sqlWorker,
     `WITH SpecificGroup AS (SELECT * FROM UsersGroups WHERE UsersGroups.Type = $groupType)
 
     SELECT Users.Id,
           Users.Name,
-          MAX(SpecificGroup.Id) AS UserGroupId
+          MAX(SpecificGroup.Id) AS UserGroupId,
+          MAX(SpecificGroup.Color) AS Color
         FROM USERS
             LEFT JOIN UserGroupAssociation ON UserGroupAssociation.UserId = Users.Id
             LEFT JOIN SpecificGroup ON SpecificGroup.Id = UserGroupAssociation.UserGroupId
         GROUP BY Users.Id;`,
-        {
-          $groupType:groupType
-        }
+    {
+      $groupType: groupType
+    }
   );
 }
 

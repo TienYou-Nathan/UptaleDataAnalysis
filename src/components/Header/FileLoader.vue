@@ -47,8 +47,8 @@ export default {
         {
           name: "database",
           label: "Select database file here",
-          defaultPath: "/database.sql",
-          format: "sql",
+          defaultPath: "/database.db",
+          format: "db",
         },
       ],
     };
@@ -100,11 +100,11 @@ export default {
         );
         //if no database is selected but one is by default
       } else if (
-        (await (await fetch("./database.sql")).blob()).type ==
+        (await (await fetch("./database.db")).blob()).type ==
         "application/x-sql; charset=utf-8"
       ) {
         result.database = new Uint8Array(
-          await (await fetch("./database.sql")).arrayBuffer()
+          await (await fetch("./database.db")).arrayBuffer()
         );
       }
 

@@ -2,10 +2,15 @@
   <form @submit.prevent="addUserGroup">
     <input id="userGroup" type="text" placeholder="add userGroup" />
   </form>
+  <select name="GroupType" id="GroupType" @change="changeFocusedGroupType">
+    <option v-for="group in groupTypes" :key="group" :value="group">
+      {{ group }}
+    </option>
+  </select>
   <table id="userList">
     <tr>
       <th>User</th>
-      <th v-for="group in usersGroups" :key="group.Id">
+      <th v-for="group in reducedGroups" :key="group.Id">
         {{ group.Name }}<br />
         <input
           type="color"
@@ -23,7 +28,7 @@
     <tr v-for="user in users" :key="user.Id">
       <td :style="{ color: user.Color }">{{ user.Id }}</td>
       <td
-        v-for="group in usersGroups"
+        v-for="group in reducedGroups"
         :key="group.Id"
         @click="$event.target.querySelector('input').click()"
       >
@@ -42,15 +47,43 @@
 <script>
 export default {
   name: "UsersSetup",
-  emits: ["addUserGroup", "updateUser", "updateUserGroup", "deleteUserGroup"],
+  emits: [
+    "addUserGroup",
+    "updateUser",
+    "updateUserGroup",
+    "deleteUserGroup",
+    "changeFocusedGroupType",
+  ],
   components: {},
   props: {
     users: Array,
     usersGroups: Array,
+    focusedGroupType: String,
+  },
+  data() {
+    return {
+      groupTypes: [],
+      reducedGroups: [],
+    };
   },
   created() {
-    console.log(this.users)
-    console.log(this.usersGroups)
+    this.groupTypes = Object.keys(
+      this.usersGroups.reduce((acc, e) => {
+        acc[e.Type] = e.Type;
+        return acc;
+      }, {})
+    );
+
+    this.reducedGroups = this.usersGroups.filter(
+      (e) => e.Type == this.focusedGroupType
+    );
+  },
+  watch: {
+    focusedGroupType() {
+      this.reducedGroups = this.usersGroups.filter(
+        (e) => e.Type == this.focusedGroupType
+      );
+    },
   },
   methods: {
     addUserGroup(e) {
@@ -69,6 +102,9 @@ export default {
     },
     colorchange(e, id) {
       this.$emit("updateUserGroup", { id, color: e.srcElement.value });
+    },
+    changeFocusedGroupType(event) {
+      this.$emit("changeFocusedGroupType", event.srcElement.value);
     },
   },
 };

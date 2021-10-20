@@ -4,7 +4,7 @@
     id="download"
     display="none"
     :href="serializedDatabaseURL"
-    download="database.sql"
+    download="database.db"
   />
   <div id="nav" :style="{ 'margin-left': sidebarWidth }">
     <Header
@@ -34,10 +34,12 @@
       <UsersSetup
         :users="users"
         :usersGroups="usersGroups"
+        :focusedGroupType="focusedGroupType"
         @addUserGroup="addUserGroup"
         @updateUser="updateUser"
         @updateUserGroup="updateUserGroup"
         @deleteUserGroup="deleteUserGroup"
+        @changeFocusedGroupType="changeFocusedGroupType"
       />
     </div>
 
@@ -108,7 +110,7 @@ export default {
       themes: [],
       users: [],
       usersGroups: [],
-      focusedGroupType:"Expertise",
+      focusedGroupType: "Expertise",
       isLoading: 0,
       progress: 0,
       progressMessage: "",
@@ -161,7 +163,7 @@ export default {
       this.scenes = await getScenes(this.sqlWorker);
       this.categories = await getCategories(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       this.isLoading = 2;
       this.isLoading = 0;
@@ -214,14 +216,14 @@ export default {
       this.isLoading = 1;
       await updateUserGroup(this.sqlWorker, userGroup);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
       this.isLoading = 0;
     },
 
     async updateUser(user) {
       this.isLoading = 1;
       await updateUser(this.sqlWorker, user);
-      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
       this.isLoading = 0;
     },
     async deleteUserGroup(groupId) {
@@ -231,7 +233,7 @@ export default {
       console.log("getUsersGroups");
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       console.log("getUsers");
-      this.users = await getUsers(this.sqlWorker,this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
       this.isLoading = 0;
     },
     async getSerializedDatabase() {
@@ -257,7 +259,10 @@ export default {
       ({ data: this.sqlDebugData, dataObject: this.sqlDebugDataObject } =
         await debug(this.sqlWorker, request));
     },
-
+    async changeFocusedGroupType(event) {
+      this.focusedGroupType = event;
+      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+    },
     changeProgress(data) {
       this.progress = data.progress;
       this.progressMessage = data.message;

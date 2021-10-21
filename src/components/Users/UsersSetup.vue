@@ -67,22 +67,20 @@ export default {
     };
   },
   created() {
-    this.groupTypes = Object.keys(
-      this.usersGroups.reduce((acc, e) => {
-        acc[e.Type] = e.Type;
-        return acc;
-      }, {})
-    );
-
-    this.reducedGroups = this.usersGroups.filter(
-      (e) => e.Type == this.focusedGroupType
-    );
+    this.updateReducedGroups();
   },
   watch: {
     focusedGroupType() {
-      this.reducedGroups = this.usersGroups.filter(
-        (e) => e.Type == this.focusedGroupType
+      this.updateReducedGroups();
+    },
+    usersGroups() {
+      this.groupTypes = Object.keys(
+        this.usersGroups.reduce((acc, e) => {
+          acc[e.Type] = e.Type;
+          return acc;
+        }, {})
       );
+      this.updateReducedGroups();
     },
   },
   methods: {
@@ -105,6 +103,11 @@ export default {
     },
     changeFocusedGroupType(event) {
       this.$emit("changeFocusedGroupType", event.srcElement.value);
+    },
+    updateReducedGroups() {
+      this.reducedGroups = this.usersGroups.filter(
+        (e) => e.Type == this.focusedGroupType
+      );
     },
   },
 };

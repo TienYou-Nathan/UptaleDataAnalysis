@@ -44,6 +44,10 @@
       />
     </div>
 
+    <div v-if="display == 'Analysis'">
+      <Analysis :sqlWorker="sqlWorker" />
+    </div>
+
     <div id="container" :hidden="!(display == 'SQL')">
       <SQLPlayground
         @SQLRequest="sqlDebug"
@@ -59,6 +63,7 @@
 <script>
 import SceneList from "./components/Categories/SceneList.vue";
 import SQLPlayground from "./components/SQL/SQLPlayground.vue";
+import Analysis from "./components/SQL/Analysis.vue";
 
 import UsersSetup from "./components/Users/UsersSetup.vue";
 
@@ -97,6 +102,7 @@ export default {
     Header,
     SceneList,
     Sidebar,
+    Analysis,
     SQLPlayground,
     UsersSetup,
   },

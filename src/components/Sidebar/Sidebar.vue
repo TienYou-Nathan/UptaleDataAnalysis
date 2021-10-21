@@ -33,6 +33,11 @@ export default {
     >
 
     <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'Analysis')"
+      icon="fas fa-file-csv"
+      >Analysis</SidebarLink
+    >
+    <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'SQL')"
       icon="fas fa-database"
       >SQL Playground</SidebarLink

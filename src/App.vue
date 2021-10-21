@@ -37,9 +37,10 @@
         :users="users"
         :usersGroups="usersGroups"
         @addUserGroup="addUserGroup"
-        @updateUser="updateUser"
         @updateUserGroup="updateUserGroup"
         @deleteUserGroup="deleteUserGroup"
+        @deleteUserGroupAssociation="deleteUserGroupAssociation"
+        @addUserGroupAssociation="addUserGroupAssociation"
       />
     </div>
 
@@ -77,6 +78,7 @@ import {
   addCategory,
   addTheme,
   addUserGroup,
+  addUserGroupAssociation,
   updateCategory,
   updateTheme,
   updateScene,
@@ -85,6 +87,7 @@ import {
   deleteUserGroup,
   deleteCategory,
   deleteTheme,
+  deleteUserGroupAssociation,
   debug,
 } from "./sqlRequests";
 
@@ -189,7 +192,12 @@ export default {
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       this.isLoading = 0;
     },
-
+    async addUserGroupAssociation(UserGroupAssociation) {
+      this.isLoading = 1;
+      await addUserGroupAssociation(this.sqlWorker, UserGroupAssociation);
+      this.users = await getUsers(this.sqlWorker);
+      this.isLoading = 0;
+    },
     async updateCategory(category) {
       this.isLoading = 1;
       await updateCategory(this.sqlWorker, category);
@@ -246,6 +254,12 @@ export default {
       await deleteTheme(this.sqlWorker, theme);
       this.scenes = await getScenes(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
+      this.isLoading = 0;
+    },
+    async deleteUserGroupAssociation(UserGroupAssociation) {
+      this.isLoading = 1;
+      await deleteUserGroupAssociation(this.sqlWorker, UserGroupAssociation);
+      this.users = await getUsers(this.sqlWorker);
       this.isLoading = 0;
     },
     async getSerializedDatabase() {

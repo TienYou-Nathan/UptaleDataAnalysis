@@ -172,6 +172,22 @@ export async function updateUser(sqlWorker, user) {
   );
 }
 
+export async function addUserGroupAssociation(sqlWorker, UserGroupAssociation) {
+  return requestSQL(
+    sqlWorker,
+    "INSERT INTO UserGroupAssociation (UserId, UserGroupId) VALUES ($UserId, $UserGroupId)",
+    { $UserId: UserGroupAssociation.UserId, $UserGroupId: UserGroupAssociation.UserGroupId }
+  );
+}
+
+export async function deleteUserGroupAssociation(sqlWorker, UserGroupAssociation) {
+  return requestSQL(
+    sqlWorker,
+    "DELETE FROM UserGroupAssociation WHERE UserId = $UserId AND UserGroupId = $UserGroupId",
+    { $UserId: UserGroupAssociation.UserId, $UserGroupId: UserGroupAssociation.UserGroupId }
+  );
+}
+
 export async function debug(sqlWorker, request) {
   let output = await sqlWorker.send({
     id: sqlWorker.id++,

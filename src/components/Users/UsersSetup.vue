@@ -41,7 +41,7 @@
           type="checkbox"
           :name="user.Id"
           :value="group.Name"
-          @click.stop="updateUser(user.Id, group.Id)"
+          @click.stop="updateUserGroupAssociation(user, group.Id)"
           :checked="user.Groups.find((e) => e.Id == group.Id)"
         />
       </td>
@@ -52,7 +52,13 @@
 <script>
 export default {
   name: "UsersSetup",
-  emits: ["addUserGroup", "updateUser", "updateUserGroup", "deleteUserGroup"],
+  emits: [
+    "addUserGroup",
+    "deleteUserGroupAssociation",
+    "addUserGroupAssociation",
+    "updateUserGroup",
+    "deleteUserGroup",
+  ],
   props: {
     users: Array,
     usersGroups: Array,
@@ -72,8 +78,23 @@ export default {
       this.$emit("deleteUserGroup", { id: groupId });
       // }
     },
-    updateUser(userId, groupId) {
-      this.$emit("updateUser", { id: userId, userGroupId: groupId });
+    updateUserGroupAssociation(user, groupId) {
+      console.log({
+        UserId: user.Id,
+        UserGroupId: groupId,
+      });
+      if (user.Groups.find((e) => e.Id == groupId)) {
+        this.$emit("deleteUserGroupAssociation", {
+          UserId: user.Id,
+          UserGroupId: groupId,
+        });
+      } else {
+        console.log("add");
+        this.$emit("addUserGroupAssociation", {
+          UserId: user.Id,
+          UserGroupId: groupId,
+        });
+      }
     },
     colorchange(e, id) {
       this.$emit("updateUserGroup", { id, color: e.srcElement.value });

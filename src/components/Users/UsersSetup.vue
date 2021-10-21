@@ -2,15 +2,20 @@
   <form @submit.prevent="addUserGroup">
     <input id="userGroup" type="text" placeholder="add userGroup" />
   </form>
-  <select name="GroupType" id="GroupType" @change="changeFocusedGroupType">
-    <option v-for="group in groupTypes" :key="group" :value="group">
-      {{ group }}
-    </option>
-  </select>
+  <div id="GroupFilter">
+    <span
+      v-for="group in usersGroups"
+      :key="group.Id"
+      :style="{ color: group.Color }"
+    >
+      <input type="checkbox" checked="true" />
+      {{ group.Name }}
+    </span>
+  </div>
   <table id="userList">
     <tr>
       <th>User</th>
-      <th v-for="group in reducedGroups" :key="group.Id">
+      <th v-for="group in usersGroups" :key="group.Id">
         {{ group.Name }}<br />
         <input
           type="color"
@@ -26,18 +31,18 @@
       </th>
     </tr>
     <tr v-for="user in users" :key="user.Id">
-      <td :style="{ color: user.Color }">{{ user.Id }}</td>
+      <td :style="{ color: user.Groups[0].Color }">{{ user.Id }}</td>
       <td
-        v-for="group in reducedGroups"
+        v-for="group in usersGroups"
         :key="group.Id"
         @click="$event.target.querySelector('input').click()"
       >
         <input
-          type="radio"
+          type="checkbox"
           :name="user.Id"
           :value="group.Name"
           @click.stop="updateUser(user.Id, group.Id)"
-          :checked="group.Id == user.UserGroupId"
+          :checked="user.Groups.find((e) => e.Id == group.Id)"
         />
       </td>
     </tr>
@@ -47,35 +52,13 @@
 <script>
 export default {
   name: "UsersSetup",
-  emits: [
-    "addUserGroup",
-    "updateUser",
-    "updateUserGroup",
-    "deleteUserGroup",
-    "changeFocusedGroupType",
-  ],
-  components: {},
+  emits: ["addUserGroup", "updateUser", "updateUserGroup", "deleteUserGroup"],
   props: {
     users: Array,
     usersGroups: Array,
-    focusedGroupType: String,
-  },
-  data() {
-    return {
-      groupTypes: [],
-      reducedGroups: [],
-    };
   },
   created() {
-    this.updateReducedGroups();
-  },
-  watch: {
-    focusedGroupType() {
-      this.updateReducedGroups();
-    },
-    usersGroups() {
-      this.updateReducedGroups();
-    },
+    console.log(this.users);
   },
   methods: {
     addUserGroup(e) {
@@ -94,20 +77,6 @@ export default {
     },
     colorchange(e, id) {
       this.$emit("updateUserGroup", { id, color: e.srcElement.value });
-    },
-    changeFocusedGroupType(event) {
-      this.$emit("changeFocusedGroupType", event.srcElement.value);
-    },
-    updateReducedGroups() {
-      this.groupTypes = Object.keys(
-        this.usersGroups.reduce((acc, e) => {
-          acc[e.Type] = e.Type;
-          return acc;
-        }, {})
-      );
-      this.reducedGroups = this.usersGroups.filter(
-        (e) => e.Type == this.focusedGroupType
-      );
     },
   },
 };
@@ -135,5 +104,14 @@ td:first-child {
 
 td:first-child:hover {
   background: none;
+}
+#GroupFilter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#GroupFilter *:hover {
+  background: lightgray;
+  cursor: pointer;
 }
 </style>

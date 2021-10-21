@@ -114,23 +114,28 @@ export async function updateScene(sqlWorker, scene) {
   );
 }
 
-export async function getUsers(sqlWorker, groupType) {
-  return requestSQL(
+export async function getUsers(sqlWorker) {
+  let initialRequest = await requestSQL(
     sqlWorker,
-    `WITH SpecificGroup AS (SELECT * FROM UsersGroups WHERE UsersGroups.Type = $groupType)
-
-    SELECT Users.Id,
-          Users.Name,
-          MAX(SpecificGroup.Id) AS UserGroupId,
-          MAX(SpecificGroup.Color) AS Color
-        FROM USERS
-            LEFT JOIN UserGroupAssociation ON UserGroupAssociation.UserId = Users.Id
-            LEFT JOIN SpecificGroup ON SpecificGroup.Id = UserGroupAssociation.UserGroupId
-        GROUP BY Users.Id;`,
-    {
-      $groupType: groupType
-    }
+    `SELECT 
+    Users.Id AS "UserId",
+    Users.Name AS "UserName",
+    UsersGroups.Id AS "UserGroupId",
+    UsersGroups.Name AS "UserGroupName",
+    UsersGroups.Color AS "UserGroupColor",
+    UsersGroups.Type AS "UserGroupType"
+  FROM Users
+  LEFT JOIN UserGroupAssociation ON UserGroupAssociation.UserId = Users.Id
+  LEFT JOIN UsersGroups ON UsersGroups.Id = UserGroupAssociation.UserGroupId;`
   );
+  initialRequest = Object.values(initialRequest.reduce((acc,e) => {
+    if(!acc[e.UserId]){
+      acc[e.UserId] = {Id:e.UserId, Name:e.UserName, Groups:[]}
+    }
+    acc[e.UserId].Groups.push({Id:e.UserGroupId, Name:e.UserGroupName, Type:e.UserGroupType, Color:e.UserGroupColor})
+    return acc
+  }, {}))
+  return initialRequest
 }
 
 export async function getUsersGroups(sqlWorker) {

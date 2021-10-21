@@ -36,12 +36,10 @@
       <UsersSetup
         :users="users"
         :usersGroups="usersGroups"
-        :focusedGroupType="focusedGroupType"
         @addUserGroup="addUserGroup"
         @updateUser="updateUser"
         @updateUserGroup="updateUserGroup"
         @deleteUserGroup="deleteUserGroup"
-        @changeFocusedGroupType="changeFocusedGroupType"
       />
     </div>
 
@@ -114,7 +112,6 @@ export default {
       themes: [],
       users: [],
       usersGroups: [],
-      focusedGroupType: "Expertise",
       isLoading: 0,
       progress: 0,
       progressMessage: "",
@@ -167,7 +164,7 @@ export default {
       this.scenes = await getScenes(this.sqlWorker);
       this.categories = await getCategories(this.sqlWorker);
       this.themes = await getThemes(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
       this.isLoading = 2;
       this.isLoading = 0;
@@ -220,21 +217,21 @@ export default {
       this.isLoading = 1;
       await updateUserGroup(this.sqlWorker, userGroup);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker);
       this.isLoading = 0;
     },
 
     async updateUser(user) {
       this.isLoading = 1;
       await updateUser(this.sqlWorker, user);
-      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker);
       this.isLoading = 0;
     },
     async deleteUserGroup(groupId) {
       this.isLoading = 1;
       await deleteUserGroup(this.sqlWorker, groupId);
       this.usersGroups = await getUsersGroups(this.sqlWorker);
-      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker);
       this.isLoading = 0;
     },
     async deleteCategory(category) {
@@ -276,7 +273,7 @@ export default {
     },
     async changeFocusedGroupType(event) {
       this.focusedGroupType = event;
-      this.users = await getUsers(this.sqlWorker, this.focusedGroupType);
+      this.users = await getUsers(this.sqlWorker);
     },
     changeProgress(data) {
       this.progress = data.progress;

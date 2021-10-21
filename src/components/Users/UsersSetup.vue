@@ -74,12 +74,6 @@ export default {
       this.updateReducedGroups();
     },
     usersGroups() {
-      this.groupTypes = Object.keys(
-        this.usersGroups.reduce((acc, e) => {
-          acc[e.Type] = e.Type;
-          return acc;
-        }, {})
-      );
       this.updateReducedGroups();
     },
   },
@@ -105,6 +99,12 @@ export default {
       this.$emit("changeFocusedGroupType", event.srcElement.value);
     },
     updateReducedGroups() {
+      this.groupTypes = Object.keys(
+        this.usersGroups.reduce((acc, e) => {
+          acc[e.Type] = e.Type;
+          return acc;
+        }, {})
+      );
       this.reducedGroups = this.usersGroups.filter(
         (e) => e.Type == this.focusedGroupType
       );

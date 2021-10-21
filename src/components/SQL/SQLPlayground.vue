@@ -9,16 +9,18 @@
   <a v-if="downloadDataURL" :href="downloadDataURL" download="result.csv"
     >Download Results</a
   >
-  <table>
-    <tr>
-      <th v-for="column in columns" :key="column">
-        {{ column }}
-      </th>
-    </tr>
-    <tr v-for="row in reducedValues" :key="row">
-      <td v-for="cell in row" :key="cell">{{ cell }}</td>
-    </tr>
-  </table>
+  <tt>
+    <table>
+      <tr>
+        <th v-for="column in columns" :key="column">
+          {{ column }}
+        </th>
+      </tr>
+      <tr v-for="row in reducedValues" :key="row">
+        <td v-for="cell in row" :key="cell">{{ cell }}</td>
+      </tr>
+    </table>
+  </tt>
 </template>
 
 <script>
@@ -110,6 +112,14 @@ export default {
   width: 50%;
   height: 20vh;
 }
+table {
+  width: auto;
+  margin: auto;
+  border: 1px solid black;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  text-align: left;
+}
 th,
 td {
   border: 1px solid black;
@@ -118,5 +128,7 @@ td {
 <style>
 .CodeMirror {
   text-align: left;
+  height: auto;
+  border: 1px solid black;
 }
 </style>

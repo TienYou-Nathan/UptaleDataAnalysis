@@ -8,8 +8,8 @@
       :key="group.Id"
       :style="{ color: group.Color }"
     >
-      <input type="checkbox" checked="true" />
-      {{ group.Name }}
+      <input type="checkbox" checked="true" disabled="true" />
+      {{ group.Name + " : " + group.Type }}
     </span>
   </div>
   <table id="userList">
@@ -133,6 +133,6 @@ td:first-child:hover {
 }
 #GroupFilter *:hover {
   background: lightgray;
-  cursor: pointer;
+  cursor: not-allowed;
 }
 </style>

@@ -203,7 +203,7 @@ LEFT JOIN Sessions ON Sessions.Id = TopicsClicks.SessionId
 LEFT JOIN Users ON Sessions.UserId = Users.Id
 LEFT JOIN UserGroupAssociation ON Users.Id = UserGroupAssociation.UserId
 LEFT JOIN UsersGroups ON UserGroupAssociation.UserGroupId = UsersGroups.Id
-WHERE UsersGroups.Type = "Expertise"  AND Users.Id NOT LIKE "Léa Frigo%")
+WHERE UsersGroups.Type = "Expertise" AND Categories.Name != "Tutoriel" AND Topics.Name NOT LIKE "Masquer%")
 
 
 SELECT 
@@ -215,14 +215,13 @@ SELECT
 	AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "M2 Order Avg",
 	AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "Order Difference"
 	FROM AllClicks
-	WHERE CategoryName != "Obligatoire" AND CategoryName != "Tutoriel" AND TopicName NOT LIKE "Masquer%"
+	WHERE CategoryName != "Obligatoire"
 GROUP BY TopicId
 ORDER BY "Order Difference";
 
 
 --En Globalité, quelles sont les scènes les plus visitées par chaque groupe
 WITH Visites AS
-
 (SELECT 
  	UsersGroups.Id AS "UsersGroupsId",
 	UsersGroups.Name AS "UserGroupName",
@@ -242,7 +241,7 @@ LEFT JOIN UserGroupAssociation ON Users.Id = UserGroupAssociation.UserId
 LEFT JOIN UsersGroups ON UserGroupAssociation.UserGroupId = UsersGroups.Id
 LEFT JOIN Scenes ON Scenes.Id = SceneVisit.SceneId
 LEFT JOIN Categories ON Categories.Id = Scenes.CategoryId
-WHERE UsersGroups.Type = "Expertise" AND Users.Id NOT LIKE "Léa Frigo%" AND Categories.Name != "Obligatoire" AND Categories.Name != "Tutoriel")
+WHERE UsersGroups.Type = "Expertise" AND Categories.Name != "Obligatoire" AND Categories.Name != "Tutoriel")
 
 SELECT 
 	SceneName,

@@ -9,22 +9,22 @@
   <a v-if="downloadDataURL" :href="downloadDataURL" download="result.csv"
     >Download Results</a
   >
-  <tt>
-    <table>
-      <tr>
-        <th v-for="column in columns" :key="column">
-          {{ column }}
-        </th>
-      </tr>
-      <tr v-for="row in reducedValues" :key="row">
-        <td v-for="cell in row" :key="cell">{{ cell }}</td>
-      </tr>
-    </table>
-  </tt>
+
+  <table>
+    <tr>
+      <th v-for="column in data.columns" :key="column">
+        {{ column }}
+      </th>
+    </tr>
+    <tr v-for="row in reducedValues" :key="row">
+      <td v-for="cell in row" :key="cell">{{ cell }}</td>
+    </tr>
+  </table>
 </template>
 
 <script>
 import { wait } from "../../utilities";
+import { debug } from "../../sqlRequests";
 
 export default {
   name: "SQLPlayground",
@@ -32,6 +32,11 @@ export default {
   components: {},
   data() {
     return {
+      data: {
+        columns: [],
+        values: [],
+      },
+      dataObject: {},
       downloadDataURL: null,
       reducedValues: [],
       reducedInterval: 0,
@@ -39,18 +44,17 @@ export default {
     };
   },
   watch: {
-    downloadData() {
+    dataObject() {
       URL.revokeObjectURL(this.downloadDataURL);
       this.downloadDataURL = URL.createObjectURL(
-        new Blob([d3.csvFormat(this.downloadData)], { type: "text/csv" })
+        new Blob([d3.csvFormat(this.dataObject)], { type: "text/csv" })
       );
     },
-    values() {
+    data() {
       this.showData();
     },
   },
   props: {
-    downloadData: {},
     columns: Array,
     values: Array,
   },
@@ -71,33 +75,41 @@ export default {
     });
   },
   methods: {
-    execEditorContents() {
-      this.$emit("SQLRequest", this.codeMirror.getValue() + ";");
+    async execEditorContents() {
+      ({ data: this.data, dataObject: this.dataObject } = await debug(
+        this.$store.state.sqlWorker,
+        this.codeMirror.getValue() + ";"
+      ));
     },
     async showData() {
       clearInterval(this.reducedInterval);
-      this.$emit("progress", {
-        progress: 100,
+      this.$store.commit("setData", {
+        key: "progress",
+        value: {
+          progress: 100,
+        },
       });
-      await wait(15);
-      this.reducedValues = [];
-      let valuesCopy = [...this.values];
-      let totalLength = this.values.length;
-      let currentLength = 0;
 
       let delay = 15;
       let batchSize = 25;
+      await wait(delay);
+      this.reducedValues = [];
+      let valuesCopy = [...this.data.values];
+      let totalLength = this.data.values.length;
+      let currentLength = 0;
 
       this.reducedInterval = setInterval(() => {
         let temp = valuesCopy.splice(batchSize);
         this.reducedValues = [...this.reducedValues, ...valuesCopy];
         valuesCopy = temp;
         currentLength = this.reducedValues.length;
-        this.$emit("progress", {
-          progress: (currentLength * 100) / totalLength,
-          message: `Displaying results\n${currentLength}/${totalLength}\nCSV ready`,
+        this.$store.commit("setData", {
+          key: "progress",
+          value: {
+            progress: (currentLength * 100) / totalLength,
+            message: `Displaying results\n${currentLength}/${totalLength}\nCSV ready`,
+          },
         });
-
         if (valuesCopy.length == 0) {
           clearInterval(this.reducedInterval);
         }
@@ -119,6 +131,7 @@ table {
   border-collapse: collapse;
   margin-bottom: 10px;
   text-align: left;
+  font-family: monospace;
 }
 th,
 td {

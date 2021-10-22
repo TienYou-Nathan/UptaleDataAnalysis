@@ -57,9 +57,8 @@ export default {
     isLoading: Number,
     perUserAnswers: Object,
     serializedDatabase: [],
-    progress: 0,
   },
-  emits: ["filesLoaded", "updateSerializedDatabase", "downloadDatabase"],
+  emits: ["updateSerializedDatabase", "downloadDatabase"],
   created() {},
   methods: {
     load_file: async function (file) {
@@ -112,7 +111,7 @@ export default {
 
       result[this.fields[0].name] = arr[0];
 
-      this.$emit("filesLoaded", result);
+      this.$store.dispatch("computeData", result);
     },
     fileChange(e) {
       this.fields.find((field) => field.name == e.target.id).file =

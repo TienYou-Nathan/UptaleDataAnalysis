@@ -1,19 +1,19 @@
 <template>
   <header>
     <progress
-      v-if="progress > 0 && progress < 100"
+      v-if="progress.progress > 0 && progress.progress < 100"
       id="progress"
       max="100"
-      :value="progress"
+      :value="progress.progress"
     ></progress>
-    <pre v-if="progress > 0 && progress < 100" id="progressMessage">{{
-      this.progressMessage
-    }}</pre>
+    <pre
+      v-if="progress.progress > 0 && progress.progress < 100"
+      id="progressMessage"
+      >{{ progress.message }}</pre
+    >
     <h1>{{ title }}</h1>
     <FileLoader
-      @filesLoaded="filesLoaded"
       @downloadDatabase="$emit('downloadDatabase')"
-      :progress="progress"
       :isLoading="isLoading"
       :serializedDatabase="serializedDatabase"
     />
@@ -27,19 +27,21 @@ export default {
   name: "Header",
   components: { FileLoader },
   emits: ["filesLoaded", "updateSerializedDatabase", "downloadDatabase"],
-  data() {
-    return {};
+  computed: {
+    isLoading() {
+      return this.$store.state.IsLoading;
+    },
+    progress() {
+      return this.$store.state.progress;
+    },
   },
   props: {
-    progress: 0,
-    progressMessage: "",
     serializedDatabase: [],
     title: {
       type: String,
       default: "[Insert Title here]",
     },
     perUserAnswers: Object,
-    isLoading: Number,
   },
   methods: {
     filesLoaded(data) {

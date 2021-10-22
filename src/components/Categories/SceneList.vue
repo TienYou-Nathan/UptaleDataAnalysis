@@ -11,7 +11,7 @@
       v-for="scene in scenes"
       :key="scene.Id"
       :scene="scene"
-      @updateScene="$emit('updateScene', $event)"
+      @updateScene="updateScene"
     />
     <div id="categoryList">
       <div class="sticky">
@@ -23,8 +23,8 @@
           :color="category.Color"
           :persistent="true"
           :type="'category'"
-          @deleteProperty="$emit('deleteCategory', $event)"
-          @updateProperty="$emit('updateCategory', $event)"
+          @deleteProperty="deleteCategory"
+          @updateProperty="updateCategory"
         />
       </div>
     </div>
@@ -38,8 +38,8 @@
           :color="theme.Color"
           :persistent="true"
           :type="'theme'"
-          @deleteProperty="$emit('deleteTheme', $event)"
-          @updateProperty="$emit('updateTheme', $event)"
+          @deleteProperty="deleteTheme"
+          @updateProperty="updateTheme"
         />
       </div>
     </div>
@@ -52,49 +52,50 @@ import SceneProperty from "./Scene/SceneProperty.vue";
 
 export default {
   name: "SceneList",
-  emits: [
-    "addCategory",
-    "addTheme",
-    "updateCategory",
-    "updateTheme",
-    "updateScene",
-    "deleteCategory",
-    "deleteTheme",
-  ],
   components: {
     Scene,
     SceneProperty,
   },
-  props: {
-    scenes: {
-      type: Array,
-      default: [],
+  computed: {
+    scenes() {
+      return this.$store.state.scenes;
     },
-    categories: {
-      type: Array,
-      default: [],
+    categories() {
+      return this.$store.state.categories;
     },
-    themes: {
-      type: Array,
-      default: [],
+    themes() {
+      return this.$store.state.themes;
     },
   },
-  created() {},
   methods: {
     addCategory(e) {
       e.preventDefault();
-      this.$emit("addCategory", {
+      this.$store.dispatch("addCategory", {
         name: e.srcElement.querySelector("#categoryName").value,
         color: "#ffffff",
       });
     },
-
     addTheme(e) {
       e.preventDefault();
-      this.$emit("addTheme", {
+      this.$store.dispatch("addTheme", {
         name: e.srcElement.querySelector("#themeName").value,
         color: "#ffffff",
       });
+    },
+    updateCategory(e) {
+      this.$store.dispatch("updateCategory", e);
+    },
+    updateTheme(e) {
+      this.$store.dispatch("updateTheme", e);
+    },
+    updateScene(e) {
+      this.$store.dispatch("updateScene", e);
+    },
+    deleteCategory(e) {
+      this.$store.dispatch("deleteCategory", e);
+    },
+    deleteTheme(e) {
+      this.$store.dispatch("deleteTheme", e);
     },
   },
 };

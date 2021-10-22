@@ -52,30 +52,24 @@
 <script>
 export default {
   name: "UsersSetup",
-  emits: [
-    "addUserGroup",
-    "deleteUserGroupAssociation",
-    "addUserGroupAssociation",
-    "updateUserGroup",
-    "deleteUserGroup",
-  ],
-  props: {
-    users: Array,
-    usersGroups: Array,
-  },
-  created() {
-    console.log(this.users);
+  computed: {
+    users() {
+      return this.$store.state.users;
+    },
+    usersGroups() {
+      return this.$store.state.usersGroups;
+    },
   },
   methods: {
     addUserGroup(e) {
-      this.$emit("addUserGroup", {
+      this.$store.dispatch("addUserGroup", {
         name: e.srcElement.querySelector("#userGroup").value,
         color: "#ffffff",
       });
     },
     deleteUserGroup(groupId) {
       // if (confirm("Are you sure you want to delete this group?")) {
-      this.$emit("deleteUserGroup", { id: groupId });
+      this.$store.dispatch("deleteUserGroup", { id: groupId });
       // }
     },
     updateUserGroupAssociation(user, groupId) {
@@ -84,20 +78,23 @@ export default {
         UserGroupId: groupId,
       });
       if (user.Groups.find((e) => e.Id == groupId)) {
-        this.$emit("deleteUserGroupAssociation", {
+        this.$store.dispatch("deleteUserGroupAssociation", {
           UserId: user.Id,
           UserGroupId: groupId,
         });
       } else {
         console.log("add");
-        this.$emit("addUserGroupAssociation", {
+        this.$store.dispatch("addUserGroupAssociation", {
           UserId: user.Id,
           UserGroupId: groupId,
         });
       }
     },
     colorchange(e, id) {
-      this.$emit("updateUserGroup", { id, color: e.srcElement.value });
+      this.$store.dispatch("updateUserGroup", {
+        id,
+        color: e.srcElement.value,
+      });
     },
   },
 };

@@ -9,27 +9,21 @@
   <a v-if="downloadDataURL" :href="downloadDataURL" download="result.csv"
     >Download Results</a
   >
-
-  <table>
-    <tr>
-      <th v-for="column in data.columns" :key="column">
-        {{ column }}
-      </th>
-    </tr>
-    <tr v-for="row in reducedValues" :key="row">
-      <td v-for="cell in row" :key="cell">{{ cell }}</td>
-    </tr>
-  </table>
+  <ViewTable :data="{ columns: data.columns, values: reducedValues }" />
 </template>
 
 <script>
 import { wait } from "../../utilities";
 import { debug } from "../../sqlRequests";
 
+import ViewTable from "./ViewTable.vue";
+
 export default {
   name: "SQLPlayground",
   emits: ["SQLRequest", "progress"],
-  components: {},
+  components: {
+    ViewTable,
+  },
   data() {
     return {
       data: {

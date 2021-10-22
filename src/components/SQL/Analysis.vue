@@ -20,27 +20,21 @@
     </tr>
   </table>
 
-  <table>
-    Clicks sur les Tags
-    <tr>
-      <th v-for="column in specificColumns" :key="column">
-        {{ column }}
-      </th>
-    </tr>
-
-    <tr v-for="row in specificValues" :key="row">
-      <td v-for="cell in row" :key="cell">{{ cell }}</td>
-    </tr>
-  </table>
+  <ViewTable
+    :title="'Clicks sur les tags'"
+    :data="{ columns: specificColumns, values: specificValues }"
+  />
 </template>
 
 <script>
-import { wait } from "../../utilities";
+import ViewTable from "./ViewTable.vue";
 
 export default {
   name: "Analysis",
   emits: [],
-  components: {},
+  components: {
+    ViewTable,
+  },
   props: {
     sqlWorker: Object,
   },
@@ -87,9 +81,9 @@ export default {
                   COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) AS "M1 Visits",
                   COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "M2 Visits",
                   COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) - COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "Visits Difference",
-                  AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) AS "M1 Order Avg",
-                  AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END) AS "M2 Order Avg",
-                  AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END) AS "Order Difference"
+                  ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END),2) AS "M1 Order Avg",
+                  ROUND(AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END),2) AS "M2 Order Avg",
+                  ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END),2) AS "Order Difference"
                 FROM Visites 
                 GROUP BY SCeneId
                 ORDER BY "Order Difference";`,
@@ -152,9 +146,9 @@ export default {
               COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) AS "M1 Clicks",
               COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "M2 Clicks",
               COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) - COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "Clicks Difference",
-                AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) AS "M1 Order Avg",
-              AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "M2 Order Avg",
-              AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "Order Difference"
+              ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END),2) AS "M1 Order Avg",
+              ROUND(AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END),2) AS "M2 Order Avg",
+              ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END),2) AS "Order Difference"
               FROM AllClicks
               WHERE CategoryName != "Obligatoire"
             GROUP BY TopicId

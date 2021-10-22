@@ -211,9 +211,9 @@ SELECT
 	COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) AS "M1 Clicks",
 	COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "M2 Clicks",
 	COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) - COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "Clicks Difference",
-    AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) AS "M1 Order Avg",
-	AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "M2 Order Avg",
-	AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END) AS "Order Difference"
+    ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END),2) AS "M1 Order Avg",
+    ROUND(AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END),2) AS "M2 Order Avg",
+    ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END),2) AS "Order Difference"
 	FROM AllClicks
 	WHERE CategoryName != "Obligatoire"
 GROUP BY TopicId
@@ -248,9 +248,24 @@ SELECT
 	COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) AS "M1 Visits",
 	COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "M2 Visits",
 	COUNT(CASE WHEN UserGroupName = "M1" THEN UserGroupName END) - COUNT(CASE WHEN UserGroupName = "M2" THEN UserGroupName END) AS "Visits Difference",
-	AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) AS "M1 Order Avg",
-	AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END) AS "M2 Order Avg",
-	AVG(CASE WHEN UserGroupName = "M1" THEN SceneOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN SceneOrder END) AS "Order Difference"
+	ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END),2) AS "M1 Order Avg",
+    ROUND(AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END),2) AS "M2 Order Avg",
+    ROUND(AVG(CASE WHEN UserGroupName = "M1" THEN TopicOrder END) - AVG(CASE WHEN UserGroupName = "M2" THEN TopicOrder END),2) AS "Order Difference"
 FROM Visites 
 GROUP BY SCeneId
 ORDER BY "Order Difference";
+
+-- Nombre de réponses aux QCM par Expertise
+SELECT 
+	QCM.Name,
+	Answer,
+	COUNT(CASE WHEN UsersGroups.Name = "M1" THEN UsersGroups.Name END) AS "M1 Answers",
+	COUNT(CASE WHEN UsersGroups.Name = "M2" THEN UsersGroups.Name END) AS "M2 Answers"
+
+FROM QCMANSWERS
+LEFT JOIN QCM ON QCM.Id = QCMAnswers.TagId
+LEFT JOIN Sessions ON QCMAnswers.SessionId = Sessions.Id
+LEFT JOIN UserGroupAssociation ON Sessions.UserId = UserGroupAssociation.UserId
+LEFT JOIN UsersGroups ON UserGroupAssociation.UserGroupId = UsersGroups.Id
+WHERE UsersGroups.Name LIKE "M%"
+GROUP BY QCM.Id, Answer;

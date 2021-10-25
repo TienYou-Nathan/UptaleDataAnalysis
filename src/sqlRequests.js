@@ -11,7 +11,7 @@ function resultsToObject(results) {
   );
 }
 
-async function requestSQL(sqlWorker, request, params) {
+export async function requestSQL(sqlWorker, request, params) {
   let results = await sqlWorker.send({
     id: sqlWorker.id++,
     action: "exec",

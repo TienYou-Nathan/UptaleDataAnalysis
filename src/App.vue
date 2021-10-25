@@ -21,6 +21,10 @@
       <Analysis />
     </div>
 
+    <div :hidden="!(display == 'QueryGenerator')">
+      <QueryGenerator />
+    </div>
+
     <div id="container" :hidden="!(display == 'SQL')">
       <SQLPlayground />
     </div>
@@ -30,6 +34,7 @@
 <script>
 import SceneList from "./components/Categories/SceneList.vue";
 import SQLPlayground from "./components/SQL/SQLPlayground.vue";
+import QueryGenerator from "./components/SQL/QueryGenerator.vue";
 import Analysis from "./components/SQL/Analysis.vue";
 
 import UsersSetup from "./components/Users/UsersSetup.vue";
@@ -48,6 +53,7 @@ export default {
     Analysis,
     SQLPlayground,
     UsersSetup,
+    QueryGenerator,
   },
   data() {
     return {

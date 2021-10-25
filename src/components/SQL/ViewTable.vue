@@ -18,9 +18,13 @@
       <td
         v-for="(cell, cellIndex) in row"
         :key="cell"
-        :style="{
-          background: gradientSortedValues[rowIndex][cellIndex],
-        }"
+        :style="
+          compare
+            ? {
+                background: gradientSortedValues[rowIndex][cellIndex],
+              }
+            : null
+        "
       >
         {{ cell }}
       </td>
@@ -58,59 +62,47 @@ export default {
       });
     },
     gradientSortedValues() {
-      let M1Color = "#e6b122";
-      let M2Color = "#22e6d9";
-      let M1ClicksIndex = this.data.columns.indexOf("M1 Clicks");
-      let M2ClicksIndex = this.data.columns.indexOf("M2 Clicks");
-      let ClicksDifferenceIndex =
-        this.data.columns.indexOf("Clicks Difference");
+      let gradientSortedValues = [];
+      this.compare?.forEach((compareElement) => {
+        let sorterIndex = this.data.columns.indexOf(compareElement.sorter);
+        let indexesToCompare = compareElement.keys.map((e) => {
+          return this.data.columns.indexOf(e.name);
+        });
 
-      let M1VisitsIndex = this.data.columns.indexOf("M1 Order Avg");
-      let M2VisitsIndex = this.data.columns.indexOf("M2 Order Avg");
-      let OrderDifferenceIndex = this.data.columns.indexOf("Order Difference");
-      let outputValues = [];
-      let maxClicksDifference = Math.max(
-        ...this.sortedValues.map((e) => Math.abs(e[ClicksDifferenceIndex]))
-      );
-      let maxOrderDifference = Math.max(
-        ...this.sortedValues.map((e) => Math.abs(e[OrderDifferenceIndex]))
-      );
-      this.sortedValues.forEach((row, index) => {
-        outputValues[index] = [];
-        let ClicksDifference = row[ClicksDifferenceIndex] / maxClicksDifference;
+        this.sortedValues.forEach((row, index) => {
+          if (!gradientSortedValues[index]) {
+            gradientSortedValues[index] = [];
+          }
 
-        let OrderDifference = row[OrderDifferenceIndex] / maxOrderDifference;
+          let valuesMax = Math.max(
+            ...this.sortedValues.map((e) =>
+              Math.abs(e[indexesToCompare[0]] - e[indexesToCompare[1]])
+            )
+          );
 
-        if (ClicksDifference > 0) {
-          outputValues[index][
-            M1ClicksIndex
-          ] = `linear-gradient(90deg, #ffffff ${
-            (1 - ClicksDifference) * 100
-          }%, ${M1Color} 0)`;
-        } else {
-          outputValues[index][
-            M2ClicksIndex
-          ] = `linear-gradient(90deg, ${M2Color} ${
-            -ClicksDifference * 100
-          }%, #ffffff 0)`;
-        }
+          let difference =
+            (row[indexesToCompare[0]] - row[indexesToCompare[1]]) / valuesMax;
 
-        if (OrderDifference > 0) {
-          outputValues[index][
-            M1VisitsIndex
-          ] = `linear-gradient(90deg, #ffffff ${
-            (1 - OrderDifference) * 100
-          }%, ${M1Color} 0)`;
-        } else {
-          outputValues[index][
-            M2VisitsIndex
-          ] = `linear-gradient(90deg, ${M2Color} ${
-            -OrderDifference * 100
-          }%, #ffffff 0)`;
-        }
+          if (difference > 0) {
+            gradientSortedValues[index][
+              sorterIndex
+            ] = `linear-gradient(90deg, #ffffff ${50 - difference * 50}%, ${
+              compareElement.keys[0].color
+            } ${50 - difference * 50}%,  ${
+              compareElement.keys[0].color
+            } 50%,  #ffffff 50%)`;
+          } else {
+            gradientSortedValues[index][
+              sorterIndex
+            ] = `linear-gradient(90deg, #ffffff 50%, ${
+              compareElement.keys[1].color
+            } 50%,${compareElement.keys[1].color} ${50 - difference * 50}%,
+            #ffffff ${50 - difference * 50}%
+            )`;
+          }
+        });
       });
-      console.log(outputValues);
-      return outputValues;
+      return gradientSortedValues;
     },
   },
   props: {
@@ -119,6 +111,7 @@ export default {
       columns: [],
       values: [],
     },
+    compare: Array,
   },
   methods: {
     sort(column, index) {
@@ -129,14 +122,6 @@ export default {
         this.sortDirection = false;
       }
     },
-    // generateGradient(columnIndex) {
-    //   let backgroundStyle = "";
-    //   if (this.data.columns[columnIndex].match(/^M/)) {
-    //     backgroundStyle = "linear-gradient(90deg, #FFC0CB 95%, #00FFFF 5%)";
-    //   }
-
-    //   return { background: backgroundStyle };
-    // },
   },
 };
 </script>

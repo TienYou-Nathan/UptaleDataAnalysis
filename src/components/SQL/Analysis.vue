@@ -23,6 +23,22 @@
   <ViewTable
     :title="'Clicks sur les tags'"
     :data="{ columns: specificColumns, values: specificValues }"
+    :compare="[
+      {
+        keys: [
+          { name: 'M1 Clicks', color: '#e6b122' },
+          { name: 'M2 Clicks', color: '#22e6d9' },
+        ],
+        sorter: 'Clicks Difference',
+      },
+      {
+        keys: [
+          { name: 'M1 Order Avg', color: '#e6b122' },
+          { name: 'M2 Order Avg', color: '#22e6d9' },
+        ],
+        sorter: 'Order Difference',
+      },
+    ]"
   />
 </template>
 

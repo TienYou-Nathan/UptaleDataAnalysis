@@ -10,7 +10,7 @@ UptaleDataAnalysis is a project that aims to provide in-depth individual and gro
 
 ## User Quickstart
 
-- [Open the application](https://tienyou-nathan.github.io/uptaledataanalysis/)
+- [Open the application](https://tienyou-nathan.github.io/UptaleDataAnalysis/)
 - Upload details csv file in the top right corner of the app
 - Click on the play button
 - Assign groups to users in `Users Setup`

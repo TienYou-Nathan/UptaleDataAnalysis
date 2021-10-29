@@ -10,7 +10,13 @@ UptaleDataAnalysis is a project that aims to provide in-depth individual and gro
 
 ## User Quickstart
 
-- TODO
+- [Open the application](https://tienyou-nathan.github.io/uptaledataanalysis/)
+- Upload details csv file in the top right corner of the app
+- Click on the play button
+- Assign groups to users in `Users Setup`
+- Assign categories and themes to scenes in `Categories Setup`
+- Execute SQL requests in `SQL Playground` (Execute with CTRL+Enter)
+- To save changes, download the database with the download button (upper right corner)
 
 ## Developper Quickstart
 

@@ -87,11 +87,7 @@ export default {
       let query = [];
       let result = {};
 
-      query.push(
-        this.fields[0].file != undefined
-          ? this.load_file(this.fields[0].file)
-          : d3[this.fields[0].format](this.fields[0].defaultPath)
-      );
+      query.push(this.load_file(this.fields[0].file));
       //If user selected a database manually
       if (this.fields[1].file) {
         result.database = new Uint8Array(

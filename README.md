@@ -20,10 +20,12 @@ UptaleDataAnalysis is a project that aims to provide in-depth individual and gro
 
 ## Developper Quickstart
 
-- `git clone https://github.com/TienYou-Nathan/UptaleDataAnalysis`
-- `cd UptaleDataAnalysis`
-- `npm i`
-- `npm run serve`
+```
+git clone https://github.com/TienYou-Nathan/UptaleDataAnalysis
+cd UptaleDataAnalysis
+npm i
+npm run serve
+```
 
 ## Dependencies
 

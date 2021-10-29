@@ -1,3 +1,3 @@
 module.exports = {
-  publicPath: "/uptaledataanalysis/",
+  publicPath: "/UptaleDataAnalysis/",
 };

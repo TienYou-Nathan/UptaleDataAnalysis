@@ -21,8 +21,8 @@
       <Analysis />
     </div>
 
-    <div :hidden="!(display == 'QueryGenerator')">
-      <QueryGenerator />
+    <div v-if="display == 'SessionLogin'">
+      <SessionLogin />
     </div>
 
     <div id="container" :hidden="!(display == 'SQL')">
@@ -34,10 +34,10 @@
 <script>
 import SceneList from "./components/Categories/SceneList.vue";
 import SQLPlayground from "./components/SQL/SQLPlayground.vue";
-import QueryGenerator from "./components/SQL/QueryGenerator.vue";
 import Analysis from "./components/SQL/Analysis.vue";
 
 import UsersSetup from "./components/Users/UsersSetup.vue";
+import SessionLogin from "./components/Users/SessionLogin.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -53,7 +53,7 @@ export default {
     Analysis,
     SQLPlayground,
     UsersSetup,
-    QueryGenerator,
+    SessionLogin,
   },
   data() {
     return {

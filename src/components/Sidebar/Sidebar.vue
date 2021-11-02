@@ -39,9 +39,9 @@ export default {
     >
 
     <SidebarLink
-      @sidebar_click="$emit('sidebar_click', 'QueryGenerator')"
-      icon="fab fa-searchengin"
-      >Query Generator</SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'SessionLogin')"
+      icon="fas fa-database"
+      >SessionLogin</SidebarLink
     >
 
     <SidebarLink

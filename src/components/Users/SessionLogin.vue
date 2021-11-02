@@ -1,4 +1,13 @@
 <template>
+  <input
+    type="date"
+    id="start"
+    name="start"
+    value="2018-07-22"
+    :min="datemin"
+    :max="datemax"
+  />
+
   <svg :width="width" :height="height"></svg>
 </template>
 
@@ -16,20 +25,28 @@ export default {
     sessions() {
       return this.$store.state.sessions;
     },
+    sessionsDates() {
+      return this.sessions.map((e) => e.StartTime);
+    },
+    datemin() {
+      return Math.min(...this.sessionsDates);
+    },
+    datemax() {
+      return Math.max(...this.sessionsDates);
+    },
   },
+  created() {},
   mounted() {
     console.log(this.$el);
+
     this.renderSVG();
   },
   methods: {
     renderSVG() {
       var data = this.sessions;
       data = data.filter((e) => e.StartTime > 978307200000);
-      let onlyDates = data.map((e) => e.StartTime);
-      console.log(onlyDates);
-      let datemin = Math.min(...onlyDates);
-      let datemax = Math.max(...onlyDates);
-      let difference = datemax - datemin;
+
+      let difference = this.datemax - this.datemin;
       let scaleFactor = difference / 500;
       this.width = 500;
       //this.width = difference;
@@ -37,21 +54,19 @@ export default {
       this.d3svg = d3.select(this.$el);
       let acc = 1;
       this.d3svg
-        .selectAll("circle")
         .data(data)
         .enter()
         .append("circle")
         .attr("cx", function (d) {
-          return (d.StartTime - datemin) / scaleFactor;
+          return (d.StartTime - this.datemin) / scaleFactor;
         })
         .attr("cy", function (d) {
           return ++acc;
         })
-        // .attr("fill", function (d) {
-        //   return d[2];
-        // })
         .attr("r", 4);
-      console.log("end");
+      // .attr("fill", function (d) {
+      //   return d[2];
+      // })
     },
   },
 };

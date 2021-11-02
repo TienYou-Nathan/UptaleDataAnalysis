@@ -8,6 +8,7 @@ import {
   getThemes,
   getUsers,
   getUsersGroups,
+  getSessions,
   addCategory,
   addTheme,
   addUserGroup,
@@ -33,6 +34,7 @@ export const SQLStore = createStore({
       themes: [],
       users: [],
       usersGroups: [],
+      sessions:[],
       progress: {
         progress: 0,
         message: "",
@@ -80,6 +82,10 @@ export const SQLStore = createStore({
       commit("setData", {
         key: "usersGroups",
         value: await getUsersGroups(sqlWorker),
+      });
+      commit("setData", {
+        key: "sessions",
+        value: await getSessions(sqlWorker),
       });
       commit("setData", { key: "IsLoading", value: 2 });
       commit("setData", { key: "IsLoading", value: 0 });
@@ -145,12 +151,20 @@ export const SQLStore = createStore({
         value: await getUsersGroups(sqlWorker),
       });
       commit("setData", { key: "users", value: await getUsers(sqlWorker) });
+      commit("setData", {
+        key: "sessions",
+        value: await getSessions(sqlWorker),
+      });
       commit("setData", { key: "IsLoading", value: 0 });
     },
     async updateUser({ commit, state }, user) {
       commit("setData", { key: "IsLoading", value: 1 });
       await updateUser(sqlWorker, user);
       commit("setData", { key: "users", value: await getUsers(sqlWorker) });
+      commit("setData", {
+        key: "sessions",
+        value: await getSessions(sqlWorker),
+      });
       commit("setData", { key: "IsLoading", value: 0 });
     },
     async deleteUserGroup({ commit, state }, groupId) {
@@ -161,6 +175,10 @@ export const SQLStore = createStore({
         value: await getUsersGroups(sqlWorker),
       });
       commit("setData", { key: "users", value: await getUsers(sqlWorker) });
+      commit("setData", {
+        key: "sessions",
+        value: await getSessions(sqlWorker),
+      });
       commit("setData", { key: "IsLoading", value: 0 });
     },
     async deleteCategory({ commit, state }, category) {
@@ -184,6 +202,10 @@ export const SQLStore = createStore({
       commit("setData", { key: "IsLoading", value: 1 });
       await deleteUserGroupAssociation(sqlWorker, UserGroupAssociation);
       commit("setData", { key: "users", value: await getUsers(sqlWorker) });
+      commit("setData", {
+        key: "sessions",
+        value: await getSessions(sqlWorker),
+      });
       commit("setData", { key: "IsLoading", value: 0 });
     },
   },

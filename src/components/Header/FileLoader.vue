@@ -86,8 +86,9 @@ export default {
     startAnalysis: async function () {
       let query = [];
       let result = {};
-
-      query.push(this.load_file(this.fields[0].file));
+      if (this.fields[0].file) {
+        query.push(this.load_file(this.fields[0].file));
+      }
       //If user selected a database manually
       if (this.fields[1].file) {
         result.database = new Uint8Array(

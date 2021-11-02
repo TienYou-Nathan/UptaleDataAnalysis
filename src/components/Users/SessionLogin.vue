@@ -12,47 +12,44 @@ export default {
       d3svg: null,
     };
   },
-  computed: {},
+  computed: {
+    sessions() {
+      return this.$store.state.sessions;
+    },
+  },
   mounted() {
-    // this.$store.state.sqlWorker
-    //   .send({
-    //     id: this.$store.state.sqlWorker.id,
-    //     action: "exec",
-    //     sql: ``,
-    //   })
-    //   .then((e) => {});
+    console.log(this.$el);
     this.renderSVG();
   },
   methods: {
     renderSVG() {
-      this.$store.commit("incrementWorkerId");
-
-      var data = [
-        [10, 20, "red"],
-        [20, 100, "red"],
-        [200, 50, "blue"],
-        [25, 80, "blue"],
-        [10, 200, "blue"],
-        [150, 75, "green"],
-        [10, 70, "green"],
-        [30, 150, "yellow"],
-        [100, 15, "yellow"],
-      ];
+      var data = this.sessions;
+      data = data.filter((e) => e.StartTime > 978307200000);
+      let onlyDates = data.map((e) => e.StartTime);
+      console.log(onlyDates);
+      let datemin = Math.min(...onlyDates);
+      let datemax = Math.max(...onlyDates);
+      let difference = datemax - datemin;
+      let scaleFactor = difference / 500;
+      this.width = 500;
+      //this.width = difference;
+      console.log(data);
       this.d3svg = d3.select(this.$el);
+      let acc = 1;
       this.d3svg
         .selectAll("circle")
         .data(data)
         .enter()
         .append("circle")
         .attr("cx", function (d) {
-          return d[0];
+          return (d.StartTime - datemin) / scaleFactor;
         })
         .attr("cy", function (d) {
-          return d[1];
+          return ++acc;
         })
-        .attr("fill", function (d) {
-          return d[2];
-        })
+        // .attr("fill", function (d) {
+        //   return d[2];
+        // })
         .attr("r", 4);
       console.log("end");
     },

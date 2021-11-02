@@ -138,6 +138,36 @@ export async function getUsers(sqlWorker) {
   return initialRequest
 }
 
+export async function getSessions(sqlWorker){
+  let initialRequest = await requestSQL(
+    sqlWorker,
+    `SELECT 
+    Sessions.Id AS "SessionId",
+    Sessions.StartTime AS "SessionStart",
+    Sessions.EndTime AS "SessionEnd",
+      Users.Id AS "UserId",
+      Users.Name AS "UserName",
+      UsersGroups.Id AS "UserGroupId",
+      UsersGroups.Name AS "UserGroupName",
+      UsersGroups.Color AS "UserGroupColor",
+      UsersGroups.Type AS "UserGroupType"
+    FROM Users
+    LEFT JOIN UserGroupAssociation ON UserGroupAssociation.UserId = Users.Id
+    LEFT JOIN UsersGroups ON UsersGroups.Id = UserGroupAssociation.UserGroupId
+    LEFT JOIN Sessions ON Sessions.UserId = Users.Id;`
+  );
+  initialRequest = Object.values(initialRequest.reduce((acc,e) => {
+    if(!acc[e.SessionId]){
+      acc[e.SessionId] = {Id:e.SessionId, StartTime: e.SessionStart, EndTime:e.SessionEnd, Name:e.UserName,  User:e.UserId, Groups:[]}
+    }
+    if(e.UserGroupId){
+      acc[e.SessionId].Groups.push({Id:e.UserGroupId, Name:e.UserGroupName, Type:e.UserGroupType, Color:e.UserGroupColor})
+    }
+    return acc
+  }, {}))
+  return initialRequest
+}
+
 export async function getUsersGroups(sqlWorker) {
   return requestSQL(sqlWorker, `SELECT Id, Name, Color, Type FROM UsersGroups`);
 }

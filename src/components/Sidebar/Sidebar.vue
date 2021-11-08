@@ -37,13 +37,6 @@ export default {
       icon="fas fa-file-csv"
       >Analysis</SidebarLink
     >
-
-    <SidebarLink
-      @sidebar_click="$emit('sidebar_click', 'SessionLogin')"
-      icon="fas fa-database"
-      >SessionLogin</SidebarLink
-    >
-
     <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'SQL')"
       icon="fas fa-database"

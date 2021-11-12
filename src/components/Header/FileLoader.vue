@@ -69,7 +69,7 @@ export default {
             resolve(reader.result);
           };
           reader.onerror = reject;
-          //reader.readAsText(file);
+          reader.readAsText(file);
         });
       }
 

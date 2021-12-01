@@ -1,6 +1,6 @@
 <template>
   <div id="accessButtons">
-    <span v-if="!isLoading" @click="startAnalysis">
+    <!-- <span v-if="!isLoading" @click="startAnalysis">
       <i class="fas fa-play-circle icon"></i>
     </span>
     <span v-if="isLoading == 1">
@@ -11,13 +11,13 @@
     </span>
     <span @click="currentWindow = 'upload'">
       <i class="fas fa-upload icon"></i>
-    </span>
+    </span> -->
     <span @click="getSerializedDatabase">
       <i class="fas fa-download icon"></i>
     </span>
   </div>
   <Prompt
-    v-if="currentWindow == 'upload'"
+    v-if="!fields[0].file && !fields[1].file"
     :data="fields"
     @fileChange="fileChange"
     @currentWindowChange="currentWindow = $event"
@@ -113,6 +113,8 @@ export default {
     fileChange(e) {
       this.fields.find((field) => field.name == e.target.id).file =
         e.target.files[0];
+      console.log(this.fields);
+      this.startAnalysis();
     },
     mapToArray(data) {
       return mapToArray(data);

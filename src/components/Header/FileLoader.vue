@@ -1,17 +1,5 @@
 <template>
   <div id="accessButtons">
-    <!-- <span v-if="!isLoading" @click="startAnalysis">
-      <i class="fas fa-play-circle icon"></i>
-    </span>
-    <span v-if="isLoading == 1">
-      <i class="fas fa-spinner fa-pulse icon"></i>
-    </span>
-    <span v-if="isLoading == 2">
-      <i class="fas fa-spinner fa-spin icon"></i>
-    </span>
-    <span @click="currentWindow = 'upload'">
-      <i class="fas fa-upload icon"></i>
-    </span> -->
     <span @click="getSerializedDatabase">
       <i class="fas fa-download icon"></i>
     </span>

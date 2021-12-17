@@ -10,6 +10,8 @@ import {
   getUsersGroups,
   getSessions,
   addCategory,
+  addQuestion,
+  addAnswer,
   addTheme,
   addUserGroup,
   addUserGroupAssociation,
@@ -34,7 +36,7 @@ export const SQLStore = createStore({
       themes: [],
       users: [],
       usersGroups: [],
-      sessions:[],
+      sessions: [],
       progress: {
         progress: 0,
         message: "",
@@ -207,6 +209,12 @@ export const SQLStore = createStore({
         value: await getSessions(sqlWorker),
       });
       commit("setData", { key: "IsLoading", value: 0 });
+    },
+    async addQuestion({ commit, state }, question) {
+      await addQuestion(sqlWorker, question);
+    },
+    async addAnswer({ commit, state }, answer) {
+      await addAnswer(sqlWorker, answer);
     },
   },
 });

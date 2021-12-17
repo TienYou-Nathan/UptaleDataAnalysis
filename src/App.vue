@@ -21,6 +21,10 @@
       <Analysis />
     </div>
 
+    <div v-if="display == 'SurveyLink'">
+      <SurveyLink />
+    </div>
+
     <div id="container" :hidden="!(display == 'SQL')">
       <SQLPlayground />
     </div>
@@ -33,6 +37,7 @@ import SQLPlayground from "./components/SQL/SQLPlayground.vue";
 import Analysis from "./components/SQL/Analysis.vue";
 
 import UsersSetup from "./components/Users/UsersSetup.vue";
+import SurveyLink from "./components/Users/SurveyLink.vue";
 
 import Sidebar from "./components/Sidebar/Sidebar.vue";
 import { sidebarWidth } from "@/components/Sidebar/state";
@@ -48,6 +53,7 @@ export default {
     Analysis,
     SQLPlayground,
     UsersSetup,
+    SurveyLink,
   },
   data() {
     return {

@@ -31,7 +31,11 @@ export default {
       icon="fas fa-edit"
       >Users Setup</SidebarLink
     >
-
+    <SidebarLink
+      @sidebar_click="$emit('sidebar_click', 'SurveyLink')"
+      icon="fas fa-file-csv"
+      >SurveyLink</SidebarLink
+    >
     <SidebarLink
       @sidebar_click="$emit('sidebar_click', 'Analysis')"
       icon="fas fa-file-csv"

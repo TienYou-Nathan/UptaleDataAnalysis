@@ -67,11 +67,9 @@ export async function updateCategory(sqlWorker, category) {
 }
 
 export async function deleteCategory(sqlWorker, category) {
-  return requestSQL(
-    sqlWorker,
-    `DELETE FROM Categories WHERE Id = $id`,
-    { $id: category.id }
-  );
+  return requestSQL(sqlWorker, `DELETE FROM Categories WHERE Id = $id`, {
+    $id: category.id,
+  });
 }
 
 export async function getThemes(sqlWorker) {
@@ -95,11 +93,9 @@ export async function updateTheme(sqlWorker, theme) {
 }
 
 export async function deleteTheme(sqlWorker, theme) {
-  return requestSQL(
-    sqlWorker,
-    `DELETE FROM Themes WHERE Id = $id`,
-    { $id: theme.id }
-  );
+  return requestSQL(sqlWorker, `DELETE FROM Themes WHERE Id = $id`, {
+    $id: theme.id,
+  });
 }
 
 export async function updateScene(sqlWorker, scene) {
@@ -128,17 +124,24 @@ export async function getUsers(sqlWorker) {
   LEFT JOIN UserGroupAssociation ON UserGroupAssociation.UserId = Users.Id
   LEFT JOIN UsersGroups ON UsersGroups.Id = UserGroupAssociation.UserGroupId;`
   );
-  initialRequest = Object.values(initialRequest.reduce((acc,e) => {
-    if(!acc[e.UserId]){
-      acc[e.UserId] = {Id:e.UserId, Name:e.UserName, Groups:[]}
-    }
-    acc[e.UserId].Groups.push({Id:e.UserGroupId, Name:e.UserGroupName, Type:e.UserGroupType, Color:e.UserGroupColor})
-    return acc
-  }, {}))
-  return initialRequest
+  initialRequest = Object.values(
+    initialRequest.reduce((acc, e) => {
+      if (!acc[e.UserId]) {
+        acc[e.UserId] = { Id: e.UserId, Name: e.UserName, Groups: [] };
+      }
+      acc[e.UserId].Groups.push({
+        Id: e.UserGroupId,
+        Name: e.UserGroupName,
+        Type: e.UserGroupType,
+        Color: e.UserGroupColor,
+      });
+      return acc;
+    }, {})
+  );
+  return initialRequest;
 }
 
-export async function getSessions(sqlWorker){
+export async function getSessions(sqlWorker) {
   let initialRequest = await requestSQL(
     sqlWorker,
     `SELECT 
@@ -156,16 +159,30 @@ export async function getSessions(sqlWorker){
     LEFT JOIN UsersGroups ON UsersGroups.Id = UserGroupAssociation.UserGroupId
     LEFT JOIN Sessions ON Sessions.UserId = Users.Id;`
   );
-  initialRequest = Object.values(initialRequest.reduce((acc,e) => {
-    if(!acc[e.SessionId]){
-      acc[e.SessionId] = {Id:e.SessionId, StartTime: e.SessionStart, EndTime:e.SessionEnd, Name:e.UserName,  User:e.UserId, Groups:[]}
-    }
-    if(e.UserGroupId){
-      acc[e.SessionId].Groups.push({Id:e.UserGroupId, Name:e.UserGroupName, Type:e.UserGroupType, Color:e.UserGroupColor})
-    }
-    return acc
-  }, {}))
-  return initialRequest
+  initialRequest = Object.values(
+    initialRequest.reduce((acc, e) => {
+      if (!acc[e.SessionId]) {
+        acc[e.SessionId] = {
+          Id: e.SessionId,
+          StartTime: e.SessionStart,
+          EndTime: e.SessionEnd,
+          Name: e.UserName,
+          User: e.UserId,
+          Groups: [],
+        };
+      }
+      if (e.UserGroupId) {
+        acc[e.SessionId].Groups.push({
+          Id: e.UserGroupId,
+          Name: e.UserGroupName,
+          Type: e.UserGroupType,
+          Color: e.UserGroupColor,
+        });
+      }
+      return acc;
+    }, {})
+  );
+  return initialRequest;
 }
 
 export async function getUsersGroups(sqlWorker) {
@@ -206,15 +223,64 @@ export async function addUserGroupAssociation(sqlWorker, UserGroupAssociation) {
   return requestSQL(
     sqlWorker,
     "INSERT INTO UserGroupAssociation (UserId, UserGroupId) VALUES ($UserId, $UserGroupId)",
-    { $UserId: UserGroupAssociation.UserId, $UserGroupId: UserGroupAssociation.UserGroupId }
+    {
+      $UserId: UserGroupAssociation.UserId,
+      $UserGroupId: UserGroupAssociation.UserGroupId,
+    }
   );
 }
 
-export async function deleteUserGroupAssociation(sqlWorker, UserGroupAssociation) {
+export async function deleteUserGroupAssociation(
+  sqlWorker,
+  UserGroupAssociation
+) {
   return requestSQL(
     sqlWorker,
     "DELETE FROM UserGroupAssociation WHERE UserId = $UserId AND UserGroupId = $UserGroupId",
-    { $UserId: UserGroupAssociation.UserId, $UserGroupId: UserGroupAssociation.UserGroupId }
+    {
+      $UserId: UserGroupAssociation.UserId,
+      $UserGroupId: UserGroupAssociation.UserGroupId,
+    }
+  );
+}
+
+// export async function addUserSurveyAssociation(
+//   sqlWorker,
+//   UserSurveyAssociation
+// ) {
+//   return requestSQL(
+//     sqlWorker,
+//     "INSERT INTO UserSurveyAssociation VALUES ($UserId, $SurveyName)",
+//     {
+//       $UserId: UserSurveyAssociation.UserId,
+//       $SurveyName: UserSurveyAssociation.SurveyName,
+//     }
+//   );
+// }
+
+export async function addQuestion(sqlWorker, question) {
+  return requestSQL(
+    sqlWorker,
+    "INSERT INTO SurveyQuestion (Question) VALUES ($Question)",
+    {
+      $Question: question.Question,
+    }
+  );
+}
+
+export async function addAnswer(sqlWorker, answer) {
+  return requestSQL(
+    sqlWorker,
+    `INSERT INTO UserAnswers (UserId, QuestionId, Answer)
+    SELECT
+    (SELECT $UserId),
+    (SELECT SurveyQuestion.Id FROM SurveyQuestion WHERE SurveyQuestion.Question == $Question),
+    (SELECT $Answer)`,
+    {
+      $UserId: answer.UserId,
+      $Question: answer.Question,
+      $Answer: answer.Answer,
+    }
   );
 }
 
